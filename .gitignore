@@ -81,3 +81,5 @@ docs/_build/
 # Temporary data
 .ipynb_checkpoints/
 
+# Fiddling files
+fiddle*.py
