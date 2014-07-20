@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-gunicorn run:app --log-file=- --bind="localhost:5000"
+gunicorn run:app --log-file=- --bind="localhost:80"
