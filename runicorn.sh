@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-gunicorn run:app --log-file=- --bind="localhost:80"
+gunicorn run:app --log-file=- --bind="0.0.0.0:8000" --reload
