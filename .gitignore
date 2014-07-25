@@ -83,3 +83,7 @@ docs/_build/
 
 # Fiddling files
 fiddle*.py
+
+# Flask-SQLAlchemy Migration
+
+migrations
