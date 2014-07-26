@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block content %}
+    <script type="text/javascript">
+        var username = $('#username').val();
+        $('#username').change(function() {
+            $("#username_error_msg").val("")
+            $.ajax({
+              url: "/check_username",
+              type: 'POST',
+              data: 'username=' + username,
+              done: function(result){ //Returns the number of users with the given username
+                         if(parseInt(result)){
+                             $("#username_error_msg").val("Sorry! The name '" + username + "' is already taken.")
+                             $("#username").val("");
+                         }
+                         else{
+                             $("#username_error_msg").val("")
+                         }
+                       }
+              });
+        });
+    </script>
+
+    <h1>Please provide a username and password:</h1>
+
+    <form id="register_form" action="" method="post" name="register">
+        {{form.hidden_tag()}}
+        <p>
+            {{form.username.label}}
+            {{form.username(size=20, maxlength=256)}}
+            <span id="#username_error_msg" class="help-inline" style="display:none"></span>
+            {% for error in form.errors.username %}
+                <span class="help-inline">[{{error}}]</span><br>
+            {% endfor %}
+        </p>
+
+        <p>
+            {{form.password.label}}
+            {{form.password(size=20, maxlength=256)}}
+            {% for error in form.errors.password %}
+                <span class="help-inline">[{{error}}]</span><br>
+            {% endfor %}
+        </p>
+
+        <p>
+            {{form.remember_me.label}}
+            {{form.remember_me}}
+        </p>
+
+        <input type="submit" name="log_in" value="Register Me">
+    </form>
+{% endblock %}

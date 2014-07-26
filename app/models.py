@@ -29,7 +29,8 @@ class Task(db.Model):
 class User(db.Model):
     __tablename__ = "users"
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.Text, index=True)
+    username = db.Column(db.Text, index=True)
+    password = db.Column(db.Text, index=True)
     created = db.Column(db.DateTime, default=datetime.utcnow())
 
     def tasks_todo(self, active=True):
@@ -43,6 +44,18 @@ class User(db.Model):
                     db.session.query(User, Task).filter(User.id == Task.requester_id and Task.is_active == bool(active)).
                         filter(User.id == self.id).all()
                 ]
+
+    def is_authenticated(self):
+        return True
+
+    def is_active(self):
+        return True
+
+    def is_anonymous(self):
+        return False
+
+    def get_id(self):
+        return unicode(self.id)
 
     def __repr__(self):
         return "<User '%r'>" % (self.name)

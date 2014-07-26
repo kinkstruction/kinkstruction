@@ -87,3 +87,5 @@ fiddle*.py
 # Flask-SQLAlchemy Migration
 
 migrations
+
+.secret

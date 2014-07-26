@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<form id="login_form" action="" method="post" name="login">
+    {{form.hidden_tag()}}
+
+    <p>
+        {{form.username.label}}
+        {{form.username(size=20, maxlength=256)}}
+        {% for error in form.errors.username %}
+            <span class="help-inline">[{{error}}]</span><br>
+        {% endfor %}
+    </p>
+    <p>
+        {{form.password.label}}
+        {{form.password(size=20, maxlength=256)}}
+        {% for error in form.errors.password %}
+            <span class="help-inline">[{{error}}]</span><br>
+        {% endfor %}
+    </p>
+
+    <p>
+        {{form.remember_me.label}}
+        {{form.remember_me}}
+    </p>
+
+    <input type="submit" name="log_in" value="Log In">
+
+</form>
+
+{% endblock %}
