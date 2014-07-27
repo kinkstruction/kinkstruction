@@ -35,6 +35,15 @@
         </p>
 
         <p>
+            {{form.email.label}}
+            {{form.email(size=20, maxlength=256)}}
+            <span id="#username_error_msg" class="help-inline" style="display:none"></span>
+            {% for error in form.errors.email %}
+                <span class="help-inline">[{{error}}]</span><br>
+            {% endfor %}
+        </p>
+
+        <p>
             {{form.password.label}}
             {{form.password(size=20, maxlength=256)}}
             {% for error in form.errors.password %}
