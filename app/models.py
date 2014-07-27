@@ -34,6 +34,7 @@ class User(db.Model):
     email = db.Column(db.Text, nullable=False)
     created = db.Column(db.DateTime, default=datetime.utcnow())
     role = db.Column(db.Integer, default=0)
+    is_validated = db.Column(db.Boolean, default=False)
     __table_args__ = (
         db.UniqueConstraint('username'),
         db.UniqueConstraint('email')
