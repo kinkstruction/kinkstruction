@@ -18,10 +18,7 @@ def beforeRequest():
 @app.route("/index", methods=['GET', 'POST'])
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    if g.user is not None and g.user.is_authenticated():
-        return render_template("index.html")
-    else:
-        return redirect("/login")
+    return render_template("index.html")
 
 
 @app.route("/login", methods=['GET', 'POST'])
@@ -51,7 +48,7 @@ def login(user=None):
 @app.route("/logout", methods=['GET', 'POST'])
 def logout():
     logout_user()
-    return redirect("/login")
+    return redirect("/")
 
 
 @app.route("/check_username", methods=['POST'])

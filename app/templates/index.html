@@ -1,6 +1,51 @@
 {% extends "base.html" %}
 {% block content %}
 
-<h1>Welcome to Kinkstruction!</h1>
+{% if g.user.is_authenticated() %}
+    Show stuff here...
+{% else %}
+    <div class="col-md-6">
+        <div class="jumbotron">
+            <h3>Welcome! Kinkstruction is a site oriented around the giving and receiving of BDSM instructions.</h3>
+        </div>
+        <div class="jumbotron">
+            <p>
+                This site is:
+                <ul>
+                    <li>A way to keep track of tasks assigned to submissives or slaves.</li>
+                    <li>An attempt at gamification of BDSM:</li>
+                    <ul>
+                        <li>Tasks have points assigned to them that are given upon completion.</li>
+                        <li>Points can be used to purchase reward tasks, avoid punishments, or for anything else your kinky mind can imagine!</li>
+                    </ul>
+                    <li>
+                        Absolutely <span class="text-success">free</span> to join and use!
+                    </li>
+                    <li>
+                        <a href="http://github.com/kinkstruction/kinkstruction">Open source!</a>
+                    </li>
+                </ul>
+            </p>
+        </div>
+        <div class="jumbotron">
+            <p>
+                This site is not:
+                <ul>
+                    <li>A <a href="http://fetlife.com">BDSM social network</a>.</li>
+                    <li>A <a href="http://alt.com">BDSM dating site/meet market</a>.</li>
+                    <li>For those who are under 18 years old or who are offended by descriptions of BDSM activities.</li>
+                </ul>
+            </p>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="jumbotron">
+            <h3><a href="/register">Sign up for free!</a></h3>
+            <p>
+                (Already have an account? <a href="/login">Log in!</a>)
+            </p>
+        </div>
+    </div>
+{% endif %}
 
 {% endblock %}
