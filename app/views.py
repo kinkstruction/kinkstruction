@@ -1,4 +1,4 @@
-from app import app, db, lm
+from app import app, db, lm, bcrypt
 from flask import render_template, g, url_for, session, flash, redirect, request
 from flask.ext.login import login_user, logout_user, current_user, login_required
 from app.models import User, Task
@@ -26,7 +26,7 @@ def login(user=None):
     if g.user is not None and g.user.is_authenticated():
         return redirect("/")
 
-    form = LoginRegisterForm()
+    form = LoginForm()
     if form.validate_on_submit():
         remember_me = form.remember_me.data
         username = form.username.data
@@ -34,7 +34,7 @@ def login(user=None):
 
         g.user = User.query.filter_by(username=username).first()
 
-        if g.user is None or g.user.password != password:
+        if g.user is None or not bcrypt.check_password_hash(g.user.pw_hash, password):
             flash("Your username or password is incorrect.")
             return redirect("/login")
 
@@ -46,6 +46,7 @@ def login(user=None):
 
 
 @app.route("/logout", methods=['GET', 'POST'])
+@login_required
 def logout():
     logout_user()
     return redirect("/")
@@ -54,23 +55,22 @@ def logout():
 @app.route("/check_username", methods=['POST'])
 def check_username():
     username = request.values.get("username")
-    print "IN CHECK_USERNAME: " + username
     return User.query.filter_by(username=username).count()
 
 
-@app.route("/register", methods=['GET', 'POST'])
-def register():
+@app.route("/sign_up", methods=['GET', 'POST'])
+def signUp():
     if g.user is not None and g.user.is_authenticated():
         return redirect("/")
 
-    form = LoginRegisterForm()
-    print "built form"
+    form = SignUpForm()
     if form.validate_on_submit():
         remember_me = form.remember_me.data
         username = form.username.data
-        password = form.password.data
+        pw_hash = bcrypt.generate_password_hash(form.password.data)
+        email = form.email.data
 
-        u = User(username=username, password=password)
+        u = User(username=username, pw_hash=pw_hash, email=email)
         db.session.add(u)
         db.session.commit()
 
@@ -84,4 +84,4 @@ def register():
 
         return render_template("index.html")
 
-    return render_template("register.html", form=form, title="Kinkstruction Registration")
+    return render_template("sign_up.html", form=form, title="Kinkstruction Registration")

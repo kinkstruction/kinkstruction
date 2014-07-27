@@ -13,3 +13,8 @@ with open(".secret") as f:
         os.environ[key] = str(val)
 
 SECRET_KEY = os.environ["SECRET_KEY"]
+
+USER_ROLES = {
+    0: "User",
+    1: "Admin"
+}

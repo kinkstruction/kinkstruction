@@ -30,8 +30,14 @@ class User(db.Model):
     __tablename__ = "users"
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.Text, index=True)
-    password = db.Column(db.Text, index=True)
+    pw_hash = db.Column(db.Text, index=True)
+    email = db.Column(db.Text, nullable=False)
     created = db.Column(db.DateTime, default=datetime.utcnow())
+    role = db.Column(db.Integer, default=0)
+    __table_args__ = (
+        db.UniqueConstraint('username'),
+        db.UniqueConstraint('email')
+    )
 
     def tasks_todo(self, active=True):
         return [x[1] for x in
