@@ -88,4 +88,4 @@ fiddle*.py
 
 migrations
 
-.secret
+secret.py

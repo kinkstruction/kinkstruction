@@ -100,13 +100,23 @@ def resend_verification_email():
 
 @app.route("/verify_email", methods=['GET', 'POST'])
 def verify_email():
-    signed_username = request.values("signed_username")
-    if verificationMailer.check_signed_username(g.user, signed_username):
+    signed_username = request.values.get("signed_username")
+
+    username = verificationMailer.signer.unsign(signed_username)
+    user = User.query.filter_by(username=username).first()
+
+    if user is not None and not user.is_validated:
+        g.user = user
         g.user.is_validated = True
         db.session.add(g.user)
         db.session.commit()
+        login_user(g.user)
         flash("Email validation successful!")
+    elif user is not None and user.is_authenticated():
+        print "hoohah!"
+        flash("You've already validated. Log in!")
     else:
+        print user.is_validated, user.is_authenticated()
         flash("Sorry, but email validation failed for some reason. <a href=\"/resend_verification_email\">Click here to resend the email</a>.")
 
     return render_template("index.html")

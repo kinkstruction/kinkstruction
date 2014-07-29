@@ -28,7 +28,7 @@ if app.config.get('DEBUG'):
 else:
     app.config['SERVER_NAME'] = 'kinkstruction.com'
 
-for key in sorted(app.config.keys()):
-    print key + ": " + str(app.config.get(key))
+# for key in sorted(app.config.keys()):
+#     print key + ": " + str(app.config.get(key))
 
 from app import views, models, verificationMailer, mail

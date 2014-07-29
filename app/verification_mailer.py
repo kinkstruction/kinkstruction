@@ -1,6 +1,6 @@
 from flask import url_for, g
 from itsdangerous import Signer
-from config import MAIL_SERVER, MAIL_PORT, MAIL_USE_TLS, MAIL_USE_SSL, MAIL_PASSWORD, ITSDANGEROUS_SECRET_KEY
+from config import *
 from flask.ext.mail import Message
 from jinja2 import Template
 import os
