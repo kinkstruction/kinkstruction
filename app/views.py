@@ -1,5 +1,5 @@
 from app import app, db, lm, bcrypt, verificationMailer
-from flask import render_template, g, url_for, session, flash, redirect, request
+from flask import render_template, g, url_for, session, flash, redirect, request, Markup
 from flask.ext.login import login_user, logout_user, current_user, login_required, AnonymousUserMixin
 from app.models import User, Task
 from forms import *
@@ -15,8 +15,7 @@ def beforeRequest():
     g.user = current_user
     try:
         if not g.user.is_validated:
-            flash(r"You need to verify your email address to continue. Please look for an email from <code>verifications@kinkstruction.com</code>. \
-                <a href=\"/resend_verification_email\">Click here to resend the email</a>.")
+            flash(Markup(r'You need to verify your email address to continue. Please look for an email from <i>verifications@kinkstruction.com</i>. <a href="/resend_verification_email">Click here to resend the email</a>.'))
     except:
         pass
 
@@ -117,6 +116,6 @@ def verify_email():
         flash("You've already validated. Log in!")
     else:
         print user.is_validated, user.is_authenticated()
-        flash("Sorry, but email validation failed for some reason. <a href=\"/resend_verification_email\">Click here to resend the email</a>.")
+        flash(Markup("Sorry, but email validation failed for some reason. <a href=\"/resend_verification_email\">Click here to resend the email</a>."))
 
     return render_template("index.html")
