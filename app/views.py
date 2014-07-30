@@ -99,8 +99,11 @@ def sign_up():
 
 @app.route("/resend_verification_email", methods=['GET', 'POST'])
 def resend_verification_email():
-    verificationMailer.send_mail(g.user)
-    return render_template("index.html")
+    # Again, guard against sending emails for static asset requests...
+
+    if not re.match("^/static/", request.path):
+        verificationMailer.send_mail(g.user)
+        return render_template("index.html")
 
 
 @app.route("/verify_email", methods=['GET', 'POST'])
