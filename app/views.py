@@ -14,12 +14,23 @@ def loadUser(id):
 
 
 @app.before_request
-def beforeRequest():
+def before_request():
     g.user = current_user
 
+    print "TEST: " + str(g.user.get_id()), re.match("^/static/", request.path), request.path
+
     # Only flash the "You need to verify..." msg if we have a user is not validated, and if the request is not for something static.
-    if g.user.get_id() is not None and not re.match("^/static/", request.path) and not g.user.is_validated:
-        flash(Markup(verify_flash_msg))
+    # Of course, don't redirect if we're already going to "not_validated.html"
+    if g.user.get_id() is not None and \
+            not re.match("^/static/", request.path) and \
+            not g.user.is_validated and \
+            request.path not in [url_for(x) for x in ["not_validated", "logout", "resend_verification_email"]]:
+        return redirect(url_for("not_validated"))
+
+
+@app.route("/not_validated")
+def not_validated():
+    return render_template("not_validated.html")
 
 
 @app.route("/index", methods=['GET', 'POST'])
@@ -103,7 +114,7 @@ def resend_verification_email():
 
     if not re.match("^/static/", request.path):
         verificationMailer.send_mail(g.user)
-        return render_template("index.html")
+        return redirect(url_for("index"))
 
 
 @app.route("/verify_email", methods=['GET', 'POST'])
