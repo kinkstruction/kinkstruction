@@ -39,12 +39,11 @@ class VerificationMailer(object):
         msg = Message('Kinkstruction Confirmation',
                    sender='verifications@kinkstruction.com',
                    recipients=[user.email])
-        msg.body = Template(template).render(validation_url=self.generate_url(user), user=user)
+        msg.html = Template(template).render(validation_url=self.generate_url(user), user=user)
         self.mail.send(msg)
 
     def generate_url(self, user):
         result = url_for("verify_email", _external=True, signed_username=self.signer.sign(user.username))
-        print "IN GENERATE_URL: " + result
         return result
 
     def check_signed_username(self, user, signed_username):
