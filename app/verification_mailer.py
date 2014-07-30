@@ -1,8 +1,9 @@
-from flask import url_for, g
+from flask import url_for, g, current_app
 from itsdangerous import Signer
 from config import *
 from flask.ext.mail import Message
 from jinja2 import Template
+from decorators import fire_and_forget
 import os
 
 
@@ -34,17 +35,23 @@ class VerificationMailer(object):
             The Kinkstruction Admin
         </p>"""
 
+    @fire_and_forget
     def send_mail(self, user):
-        template = self.get_template("/templates/mail_sign_in.html")
-        msg = Message('Kinkstruction Confirmation',
-                   sender='verifications@kinkstruction.com',
-                   recipients=[user.email])
-        msg.html = Template(template).render(validation_url=self.generate_url(user), user=user)
-        self.mail.send(msg)
+
+        with self.app.app_context():
+
+            template = self.get_template("/templates/mail_sign_in.html")
+            msg = Message('Kinkstruction Confirmation',
+                       sender='verifications@kinkstruction.com',
+                       recipients=[user.email])
+            msg.html = Template(template).render(validation_url=self.generate_url(user), user=user)
+            self.mail.send(msg)
 
     def generate_url(self, user):
-        result = url_for("verify_email", _external=True, signed_username=self.signer.sign(user.username))
-        return result
+
+        with self.app.app_context():
+            result = url_for("verify_email", _external=True, signed_username=self.signer.sign(user.username))
+            return result
 
     def check_signed_username(self, user, signed_username):
         return self.signer.unsign(signed_username) == user.username
