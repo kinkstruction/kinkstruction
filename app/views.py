@@ -3,6 +3,9 @@ from flask import render_template, g, url_for, session, flash, redirect, request
 from flask.ext.login import login_user, logout_user, current_user, login_required, AnonymousUserMixin
 from app.models import User, Task
 from forms import *
+import re
+
+verify_flash_msg = r'You need to verify your email address to continue. Please look for an email from <i>verifications@kinkstruction.com</i>. <a href="/resend_verification_email">Click here to resend the email</a>.'
 
 
 @lm.user_loader
@@ -13,11 +16,10 @@ def loadUser(id):
 @app.before_request
 def beforeRequest():
     g.user = current_user
-    try:
-        if not g.user.is_validated:
-            flash(Markup(r'You need to verify your email address to continue. Please look for an email from <i>verifications@kinkstruction.com</i>. <a href="/resend_verification_email">Click here to resend the email</a>.'))
-    except:
-        pass
+
+    # Only flash the "You need to verify..." msg if we have a user is not validated, and if the request is not for something static.
+    if g.user.get_id() is not None and not re.match("^/static/", request.path) and not g.user.is_validated:
+        flash(Markup(verify_flash_msg))
 
 
 @app.route("/index", methods=['GET', 'POST'])
@@ -83,9 +85,13 @@ def sign_up():
         u = User.query.filter_by(username=username).first()
 
         g.user = u
+        current_user = g.user
 
         verificationMailer.send_mail(u)
 
+        logout_user()
+
+        flash(Markup(verify_flash_msg))
         return render_template("index.html")
 
     return render_template("sign_up.html", form=form, title="Kinkstruction Registration")
