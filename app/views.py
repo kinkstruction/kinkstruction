@@ -17,7 +17,21 @@ def loadUser(id):
 def before_request():
     g.user = current_user
 
-    print "TEST: " + str(g.user.get_id()), re.match("^/static/", request.path), request.path
+    # If we're sent to the root URL with age_verification=1, then set the cookie
+    if request.args.get("age_verification"):
+        session["kinkstruction.com|18+"] = 1
+
+    # If g.user doesn't point to an actual user, and if we aren't given an ?age_verification=1,
+    # then we see if we need to show the 18+ disclaimer...
+    if g.user.get_id() is None and not request.args.get("age_verification") and request.path != "/18_years_or_older" and not re.match("^/static", request.path):
+        # The key of our cookie is "kinkstruction.com|18+"
+        # The value is just 1...we don't care about the value, so much as
+        # whether or not the cookie exists.
+        # NOTE: By default, the `permanent_session_lifetime` parameter is set
+        # to a timedelta of 31 days, hence this will last a month or so.
+
+        if not session.get("kinkstruction.com|18+"):
+            return redirect(url_for("age_verification"))
 
     # Only flash the "You need to verify..." msg if we have a user is not validated, and if the request is not for something static.
     # Of course, don't redirect if we're already going to "not_validated.html"
@@ -28,6 +42,11 @@ def before_request():
         return redirect(url_for("not_validated"))
 
 
+@app.route("/18_years_or_older")
+def age_verification():
+    return render_template("18_years_or_older.html")
+
+
 @app.route("/not_validated")
 def not_validated():
     return render_template("not_validated.html")
@@ -36,6 +55,7 @@ def not_validated():
 @app.route("/index", methods=['GET', 'POST'])
 @app.route('/', methods=['GET', 'POST'])
 def index():
+
     return render_template("index.html")
 
 
@@ -132,10 +152,8 @@ def verify_email():
         login_user(g.user)
         flash("Email validation successful!")
     elif user is not None and user.is_authenticated():
-        print "hoohah!"
         flash("You've already validated. Log in!")
     else:
-        print user.is_validated, user.is_authenticated()
         flash(Markup("Sorry, but email validation failed for some reason. <a href=\"/resend_verification_email\">Click here to resend the email</a>."))
 
     return render_template("index.html")
