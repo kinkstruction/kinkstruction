@@ -20,7 +20,9 @@
     <div class="jumbotron">
         <h4>About me:</h4>
         {% if user.bio %}
-            {{user.bio}}
+{% filter markdown %}
+{{user.bio}}
+{% endfilter %}
         {% endif %}
     </div>
 

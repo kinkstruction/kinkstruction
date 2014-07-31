@@ -3,6 +3,7 @@ from flask import render_template, g, url_for, session, flash, redirect, request
 from flask.ext.login import login_user, logout_user, current_user, login_required, AnonymousUserMixin
 from app.models import User, Task
 from forms import *
+from markdown import markdown
 import re
 
 verify_flash_msg = r'You need to verify your email address to continue. Please look for an email from <i>verifications@kinkstruction.com</i>. <a href="/resend_verification_email">Click here to resend the email</a>.'

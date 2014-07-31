@@ -6,6 +6,7 @@ from flask.ext.login import LoginManager
 from flask.ext.script import Manager
 from flask.ext.migrate import Migrate, MigrateCommand
 from verification_mailer import VerificationMailer
+from flaskext.markdown import Markdown
 
 
 app = Flask(__name__)
@@ -22,6 +23,8 @@ lm.login_view = 'login'
 migrate = Migrate(app, db)
 manager = Manager(app)
 manager.add_command('db', MigrateCommand)
+
+Markdown(app)
 
 if app.config.get('DEBUG'):
     app.config['SERVER_NAME'] = "localhost:8000"
