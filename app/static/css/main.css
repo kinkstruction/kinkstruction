@@ -8,4 +8,8 @@
     background-color: transparent;
 }
 
-.required{color: red;}
+.left{float: left;}
+
+.right{float: right;}
+
+.clear{clear: both;}

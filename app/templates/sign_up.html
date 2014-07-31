@@ -76,6 +76,16 @@
 
         <p>
             <p>
+                {{form.gender.label}}
+                {{form.gender(size=12, maxlength=24)}}
+                {% for error in form.errors.gender %}
+                    <span class="text-danger">[{{error}}]</span><br>
+                {% endfor %}
+            </p>
+        </p>
+
+        <p>
+            <p>
                 {{form.role.label}}
                 {{form.role(size=12, maxlength=24)}}
                 {% for error in form.errors.role %}

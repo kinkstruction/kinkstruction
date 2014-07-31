@@ -90,6 +90,18 @@ def logout():
     return redirect("/")
 
 
+@app.route("/profile/<int:id>")
+@login_required
+def profile_page(id):
+    # TODO: Here is where we would also filter by privacy setting(s)
+    user = User.query.filter_by(id=id).first()
+
+    if user is None:
+        return render_template(url_for("index"))
+
+    return render_template("profile.html", user=user, title=user.username + " - Kinkstruction")
+
+
 @app.route("/check_username", methods=['POST'])
 def check_username():
     username = request.values.get("username")
@@ -103,12 +115,14 @@ def sign_up():
 
     form = SignUpForm()
     if form.validate_on_submit():
-        remember_me = form.remember_me.data
-        username = form.username.data
-        pw_hash = bcrypt.generate_password_hash(form.password.data)
-        email = form.email.data
+        form_data = form.data
+        form_data.pop("confirm_password")
+        form_data.pop("remember_me")
+        form_data["pw_hash"] = bcrypt.generate_password_hash(form_data.pop("password"))
 
-        u = User(username=username, pw_hash=pw_hash, email=email)
+        username = form_data["username"]
+
+        u = User(**form_data)
         db.session.add(u)
         db.session.commit()
 

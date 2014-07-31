@@ -45,6 +45,9 @@ class User(db.Model):
         ,db.CheckConstraint('age is null or age >= 18')
     )
 
+    def age_gender_role(self):
+        return " ".join([str(x) if x is not None else "" for x in [self.age, self.gender, self.role]])
+
     def tasks_todo(self, active=True):
         return [x[1] for x in
                 db.session.query(User, Task).filter(User.id == Task.doer_id and Task.is_active == bool(active)).
