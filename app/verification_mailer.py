@@ -16,11 +16,11 @@ class VerificationMailer(object):
     def get_template(self, user):
         return """
         <p>
-            Dear {{user.username}},
+            Dear {{username}},
         </p>
 
         <p>
-            You've received this email because someone using the email address {{user.email}}--hopefully you--opened up an account at kinkstruction.com.
+            You've received this email because someone using the email address {{email}}--hopefully you--opened up an account at kinkstruction.com.
             Please click the link below to validate your email address and activate your account.
         </p>
 
@@ -36,22 +36,22 @@ class VerificationMailer(object):
         </p>"""
 
     @fire_and_forget
-    def send_mail(self, user):
+    def send_mail(self, username, email):
 
         with self.app.app_context():
 
             template = self.get_template("/templates/mail_sign_in.html")
             msg = Message('Kinkstruction Confirmation',
                        sender='verifications@kinkstruction.com',
-                       recipients=[user.email])
-            msg.html = Template(template).render(validation_url=self.generate_url(user), user=user)
+                       recipients=[email])
+            msg.html = Template(template).render(validation_url=self.generate_url(username), username=username, email=email)
             self.mail.send(msg)
 
-    def generate_url(self, user):
+    def generate_url(self, username):
 
         with self.app.app_context():
-            result = url_for("verify_email", _external=True, signed_username=self.signer.sign(user.username))
+            result = url_for("verify_email", _external=True, signed_username=self.signer.sign(username))
             return result
 
-    def check_signed_username(self, user, signed_username):
-        return self.signer.unsign(signed_username) == user.username
+    def check_signed_username(self, username, signed_username):
+        return self.signer.unsign(signed_username) == username
