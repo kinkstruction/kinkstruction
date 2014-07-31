@@ -38,7 +38,7 @@ def before_request():
     if g.user.get_id() is not None and \
             not re.match("^/static/", request.path) and \
             not g.user.is_validated and \
-            request.path not in [url_for(x) for x in ["not_validated", "logout", "resend_verification_email"]]:
+            request.path not in [url_for(x) for x in ["not_validated", "logout", "resend_verification_email", "verify_email"]]:
         return redirect(url_for("not_validated"))
 
 
@@ -118,7 +118,7 @@ def sign_up():
         g.user = u
         current_user = g.user
 
-        verificationMailer.send_mail(u)
+        verificationMailer.send_mail(u.username, u.email)
 
         logout_user()
 
@@ -131,10 +131,16 @@ def sign_up():
 @app.route("/resend_verification_email", methods=['GET', 'POST'])
 def resend_verification_email():
     # Again, guard against sending emails for static asset requests...
+    # Also, don't send email if we don't know who the hell we're sending it to
+    if not re.match("^/static/", request.path) and g.user.get_id():
+        # I'm not completely certain, but I believe we need this assignment so that
+        # g.user doesn't get clobbered in the thread within verificationMailer.send_mail()
+        u = g.user
 
-    if not re.match("^/static/", request.path):
-        verificationMailer.send_mail(g.user)
-        return redirect(url_for("index"))
+        verificationMailer.send_mail(u.username, u.email)
+        flash(Markup("Verification email resent to <i>%s</i>. If you still can't find it, check your spam folder" % g.user.email))
+
+    return redirect(url_for("index"))
 
 
 @app.route("/verify_email", methods=['GET', 'POST'])
@@ -142,6 +148,7 @@ def verify_email():
     signed_username = request.values.get("signed_username")
 
     username = verificationMailer.signer.unsign(signed_username)
+
     user = User.query.filter_by(username=username).first()
 
     if user is not None and not user.is_validated:

@@ -8,7 +8,7 @@ class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     created = db.Column(db.DateTime, default=datetime.utcnow(), index=True)
     end_timestamp = db.Column(db.DateTime, default=datetime.utcnow(), index=True)
-    description = db.Column(db.Text, nullable=False, index=True)
+    description = db.Column(db.String, nullable=False, index=True)
     requester_id = db.Column(db.Integer, nullable=False)
     doer_id = db.Column(db.Integer, nullable=False)
     is_active = db.Column(db.Boolean, default=True)
@@ -29,15 +29,20 @@ class Task(db.Model):
 class User(db.Model):
     __tablename__ = "users"
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.Text, index=True)
-    pw_hash = db.Column(db.Text, index=True)
-    email = db.Column(db.Text, nullable=False)
+    username = db.Column(db.String, index=True)
+    pw_hash = db.Column(db.String, index=True)
+    age = db.Column(db.Integer)
+    gender = db.Column(db.String(24))
+    role = db.Column(db.String(24))
+    bio = db.Column(db.String)
+    email = db.Column(db.String, nullable=False)
     created = db.Column(db.DateTime, default=datetime.utcnow())
-    role = db.Column(db.Integer, default=0)
+    user_role = db.Column(db.Integer, default=0)
     is_validated = db.Column(db.Boolean, default=False)
     __table_args__ = (
-        db.UniqueConstraint('username'),
-        db.UniqueConstraint('email')
+        db.UniqueConstraint('username')
+        ,db.UniqueConstraint('email')
+        ,db.CheckConstraint('age is null or age >= 18')
     )
 
     def tasks_todo(self, active=True):
