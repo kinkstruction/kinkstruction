@@ -31,7 +31,7 @@
         <p>
             {{form.username.label}}<span class="text-primary">*</span>
             {{form.username(size=20, maxlength=256)}}
-            <span id="#username_error_msg" class="text-danger" style="display:none"></span>
+            <span id="username_error_msg" class="text-danger" style="display:none"></span>
             {% for error in form.errors.username %}
                 <span class="text-danger">[{{error}}]</span><br>
             {% endfor %}
@@ -40,7 +40,7 @@
         <p>
             {{form.email.label}}<span class="text-primary">*</span>
             {{form.email(size=20, maxlength=256)}}
-            <span id="#username_error_msg" class="text-danger" style="display:none"></span>
+            <span id="email_error_msg" class="text-danger" style="display:none"></span>
             {% for error in form.errors.email %}
                 <span class="text-danger">[{{error}}]</span><br>
             {% endfor %}

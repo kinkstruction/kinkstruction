@@ -103,10 +103,36 @@ def profile_page(id):
     return render_template("profile.html", user=user, title=user.username + " - Kinkstruction")
 
 
-@app.route("/check_username", methods=['POST'])
-def check_username():
-    username = request.values.get("username")
-    return User.query.filter_by(username=username).count()
+@app.route("/profile/edit", methods=['GET', 'POST'])
+@login_required
+def edit_profile():
+    form = EditProfileForm()
+
+    print "form.data = " + str(form.data)
+    if form.validate_on_submit():
+        form_data = dict(form.data)
+
+        for attr in form_data:
+            if form_data[attr] and form_data[attr] != getattr(g.user, attr):
+                setattr(g.user, attr, form_data[attr])
+
+        db.session.add(g.user)
+        db.session.commit()
+
+        flash("Your changes have been saved!")
+        return redirect(url_for('profile_page', id=g.user.id))
+    else:
+        # TODO: There has *got* to be a better way...
+        # Iterating through form doesn't seem to do it, though, for reasons
+        # I don't understand.
+        form.username.data = g.user.username
+        form.email.data = g.user.email
+        form.age.data = g.user.age if g.user.age is not None else ""
+        form.gender.data = g.user.gender if g.user.gender is not None else ""
+        form.role.data = g.user.role if g.user.role is not None else ""
+        form.bio.data = g.user.bio if g.user.bio is not None else ""
+
+        return render_template('edit_profile.html', form=form)
 
 
 @app.route("/sign_up", methods=['GET', 'POST'])
@@ -138,7 +164,7 @@ def sign_up():
         logout_user()
 
         flash(Markup(verify_flash_msg))
-        return render_template("index.html")
+        return redirect(url_for('index'))
 
     return render_template("sign_up.html", form=form, title="Kinkstruction Registration")
 
@@ -179,3 +205,9 @@ def verify_email():
         flash(Markup("Sorry, but email validation failed for some reason. <a href=\"/resend_verification_email\">Click here to resend the email</a>."))
 
     return render_template("index.html")
+
+
+@app.route("/check_username", methods=['POST'])
+def check_username():
+    username = request.values.get("username")
+    return User.query.filter_by(username=username).count()
