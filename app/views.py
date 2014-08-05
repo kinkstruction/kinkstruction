@@ -1,7 +1,7 @@
 from app import app, db, lm, bcrypt, verificationMailer
 from flask import render_template, g, url_for, session, flash, redirect, request, Markup
 from flask.ext.login import login_user, logout_user, current_user, login_required, AnonymousUserMixin
-from app.models import User, Task
+from app.models import User, Task, Message
 from forms import *
 from markdown import markdown
 import re
@@ -108,7 +108,6 @@ def profile_page(id):
 def edit_profile():
     form = EditProfileForm()
 
-    print "form.data = " + str(form.data)
     if form.validate_on_submit():
         form_data = dict(form.data)
 
@@ -214,6 +213,44 @@ def messages():
     outbox_messages = g.user.get_all_outbox_messages()
 
     return render_template("messages.html", inbox_messages=inbox_messages, outbox_messages=outbox_messages)
+
+
+@app.route("/message/<int:id>", methods=['GET', 'POST'])
+@login_required
+def view_message(id):
+    message = Message.query.filter_by(id=id).first()
+    if message is None:
+        flash("Unable to display that message.")
+        return redirect(url_for('index'))
+
+    return render_template('view_message.html', message=message)
+
+
+@app.route("/message/send/<int:id>", methods=['GET', 'POST'])
+@login_required
+def new_message(id):
+    form = NewMessageForm()
+
+    if form.validate_on_submit():
+        message = Message(
+            from_user_id=g.user.id,
+            to_user_id=id,
+            title=form.title.data,
+            body=form.body.data
+        )
+
+        db.session.add(message)
+        db.session.commit()
+
+        flash("Message sent!")
+        return redirect(url_for('messages'))
+    else:
+        user = User.query.filter_by(id=id).first()
+        if user is None:
+            flash("Unable to send a message to that user.")
+            return redirect(url_for('index'))
+        else:
+            return render_template('new_message.html', user=user, form=form)
 
 
 @app.route("/check_username", methods=['POST'])

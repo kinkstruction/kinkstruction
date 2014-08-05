@@ -16,14 +16,14 @@ class Message(db.Model):
         db.CheckConstraint("to_user_id != from_user_id"),
     )
 
-    def from_username():
+    def from_username(self):
         user = User.query.filter_by(id=self.from_user_id).first()
         if user is not None:
             return user.username
         else:
             return None
 
-    def to_username():
+    def to_username(self):
         user = User.query.filter_by(id=self.to_user_id).first()
         if user is not None:
             return user.username
@@ -77,13 +77,13 @@ class User(db.Model):
     )
 
     def get_all_inbox_messages(self):
-        return Message.query.filter(Message.to_user_id == self.id).order_by(Message.sent_timestamp.desc()).all()
+        return Message.query.filter_by(to_user_id=self.id).order_by(Message.sent_timestamp.desc()).all()
 
     def get_all_outbox_messages(self):
-        return Message.query.filter(Message.from_user_id == self.id).order_by(Message.sent_timestamp.desc()).all()
+        return Message.query.filter_by(from_user_id=self.id).order_by(Message.sent_timestamp.desc()).all()
 
     def num_unread_messages(self):
-        return Message.query.filter(Message.to_user_id == self.id).filter(not Message.is_read).count()
+        return Message.query.filter_by(to_user_id=self.id).filter(not Message.is_read).count()
 
     def age_gender_role(self):
         return " ".join([str(x) if x is not None else "" for x in [self.age, self.gender, self.role]])

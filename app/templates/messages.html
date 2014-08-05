@@ -11,10 +11,12 @@
     <div id="messageBoxContent" class="tab-content">
         <div class="tab-pane fade active in" id="inbox">
             <ul class="list-group">
-                {% if inboxMessages %}
-                    {% for message in inboxMessages %}
+                {% if inbox_messages %}
+                    {% for message in inbox_messages %}
                         <li class="list-group-item">
-                            From: {{message.from_username()}} Sent: {{message.sent_timestamp}} Title: {{message.title}}
+                            <p>From: <a href="{{url_for('profile_page', id=message.from_user_id)}}">{{message.from_username()}}</a></p>
+                            <p>Sent: {{message.sent_timestamp}}</p>
+                            <p>Title: <a href="{{url_for('view_message', id=message.id)}}">{{message.title}}</a></p>
                         </li>
                     {% endfor %}
                 {% else %}
@@ -24,10 +26,12 @@
         </div>
         <div class="tab-pane fade" id="outbox">
             <ul class="list-group">
-                {% if outboxMessages %}
-                    {% for message in outboxMessages %}
+                {% if outbox_messages %}
+                    {% for message in outbox_messages %}
                         <li class="list-group-item">
-                            To: {{message.to_username()}} Sent: {{message.sent_timestamp}} Title: {{message.title}}
+                            <p>To: <a href="{{url_for('profile_page', id=message.to_user_id)}}">{{message.to_username()}}</a></p>
+                            <p>Sent: {{message.sent_timestamp}}</p>
+                            <p>Title: <a href="{{url_for('view_message', id=message.id)}}">{{message.title}}</a></p>
                         </li>
                     {% endfor %}
                 {% else %}

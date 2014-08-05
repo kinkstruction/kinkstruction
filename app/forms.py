@@ -4,6 +4,13 @@ from wtforms.validators import *
 from app.models import User, Task
 
 
+class NewMessageForm(Form):
+    title = StringField('Title: ',
+        validators=[Required(), Length(max=256)]
+    )
+    body = TextAreaField('Body: ', validators=[Required()])
+
+
 # Can be used either for logging in or initially registering an account.
 class LoginForm(Form):
     username = StringField('Username: ',

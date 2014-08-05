@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+    <h2>{{message.title}}</h2>
+    <p>
+        <h3>From: </h3> {{message.from_username()}}
+    </p>
+    <p>
+        <h3>Sent: </h3> {{message.sent_timestamp}}
+    </p>
+
+{% filter markdown %}
+{{message.body}}
+{% endfilter %}
+
+{% endblock %}
