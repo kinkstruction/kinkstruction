@@ -207,6 +207,15 @@ def verify_email():
     return render_template("index.html")
 
 
+@app.route("/messages", methods=['GET', 'POST'])
+@login_required
+def messages():
+    inbox_messages = g.user.get_all_inbox_messages()
+    outbox_messages = g.user.get_all_outbox_messages()
+
+    return render_template("messages.html", inbox_messages=inbox_messages, outbox_messages=outbox_messages)
+
+
 @app.route("/check_username", methods=['POST'])
 def check_username():
     username = request.values.get("username")

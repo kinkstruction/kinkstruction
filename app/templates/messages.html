@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+    <ul class="nav nav-tabs">
+        <li class="active">
+            <a href="#inbox" data-toggle="tab">Inbox</a>
+        </li>
+        <li>
+            <a href="#outbox" data-toggle="tab">Outbox</a>
+        </li>
+    </ul>
+    <div id="messageBoxContent" class="tab-content">
+        <div class="tab-pane fade active in" id="inbox">
+            <ul class="list-group">
+                {% if inboxMessages %}
+                    {% for message in inboxMessages %}
+                        <li class="list-group-item">
+                            From: {{message.from_username()}} Sent: {{message.sent_timestamp}} Title: {{message.title}}
+                        </li>
+                    {% endfor %}
+                {% else %}
+                    <h3>You have no messages in your inbox!</h3>
+                {% endif %}
+            </ul>
+        </div>
+        <div class="tab-pane fade" id="outbox">
+            <ul class="list-group">
+                {% if outboxMessages %}
+                    {% for message in outboxMessages %}
+                        <li class="list-group-item">
+                            To: {{message.to_username()}} Sent: {{message.sent_timestamp}} Title: {{message.title}}
+                        </li>
+                    {% endfor %}
+                {% else %}
+                    <h3>You have no messages in your outbox!</h3>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+
+{% endblock %}
