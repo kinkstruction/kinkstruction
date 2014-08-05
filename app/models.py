@@ -3,6 +3,37 @@ from app import db
 from datetime import datetime, date
 
 
+class Message(db.Model):
+    __tablename__ = "messages"
+    id = db.Column(db.Integer, primary_key=True)
+    sent_timestamp = db.Column(db.DateTime, default=datetime.utcnow(), index=True)
+    to_user_id = db.Column(db.Integer, nullable=False)
+    from_user_id = db.Column(db.Integer, nullable=False)
+    title = db.Column(db.String, index=True)
+    body = db.Column(db.String, nullable=False, index=True)
+    is_read = db.Column(db.Boolean, default=False)
+    __table_args__ = (
+        db.CheckConstraint("to_user_id != from_user_id"),
+    )
+
+    def from_username(self):
+        user = User.query.filter_by(id=self.from_user_id).first()
+        if user is not None:
+            return user.username
+        else:
+            return None
+
+    def to_username(self):
+        user = User.query.filter_by(id=self.to_user_id).first()
+        if user is not None:
+            return user.username
+        else:
+            return None
+
+    def __repr__(self):
+        return "<Message: From: %d, to: %d, title: %r>" % (self.from_user_id, self.to_user_id, self.title)
+
+
 class Task(db.Model):
     __tablename__ = "task"
     id = db.Column(db.Integer, primary_key=True)
@@ -40,10 +71,19 @@ class User(db.Model):
     user_role = db.Column(db.Integer, default=0)
     is_validated = db.Column(db.Boolean, default=False)
     __table_args__ = (
-        db.UniqueConstraint('username')
-        ,db.UniqueConstraint('email')
-        ,db.CheckConstraint('age is null or age >= 18')
+        db.UniqueConstraint('username'),
+        db.UniqueConstraint('email'),
+        db.CheckConstraint('age is null or (age >= 18 and age <= 100)')
     )
+
+    def get_all_inbox_messages(self):
+        return Message.query.filter_by(to_user_id=self.id).order_by(Message.sent_timestamp.desc()).all()
+
+    def get_all_outbox_messages(self):
+        return Message.query.filter_by(from_user_id=self.id).order_by(Message.sent_timestamp.desc()).all()
+
+    def num_unread_messages(self):
+        return Message.query.filter_by(to_user_id=self.id).filter(not Message.is_read).count()
 
     def age_gender_role(self):
         return " ".join([str(x) if x is not None else "" for x in [self.age, self.gender, self.role]])

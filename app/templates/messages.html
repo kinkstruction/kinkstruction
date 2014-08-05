@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block content %}
+    <ul class="nav nav-tabs">
+        <li class="active">
+            <a href="#inbox" data-toggle="tab">Inbox</a>
+        </li>
+        <li>
+            <a href="#outbox" data-toggle="tab">Outbox</a>
+        </li>
+    </ul>
+    <div id="messageBoxContent" class="tab-content">
+        <div class="tab-pane fade active in" id="inbox">
+            <ul class="list-group">
+                {% if inbox_messages %}
+                    {% for message in inbox_messages %}
+                        <li class="list-group-item">
+                            <p>From: <a href="{{url_for('profile_page', id=message.from_user_id)}}">{{message.from_username()}}</a></p>
+                            <p>Sent: {{message.sent_timestamp}}</p>
+                            <p>Title: <a href="{{url_for('view_message', id=message.id)}}">{{message.title}}</a></p>
+                        </li>
+                    {% endfor %}
+                {% else %}
+                    <h3>You have no messages in your inbox!</h3>
+                {% endif %}
+            </ul>
+        </div>
+        <div class="tab-pane fade" id="outbox">
+            <ul class="list-group">
+                {% if outbox_messages %}
+                    {% for message in outbox_messages %}
+                        <li class="list-group-item">
+                            <p>To: <a href="{{url_for('profile_page', id=message.to_user_id)}}">{{message.to_username()}}</a></p>
+                            <p>Sent: {{message.sent_timestamp}}</p>
+                            <p>Title: <a href="{{url_for('view_message', id=message.id)}}">{{message.title}}</a></p>
+                        </li>
+                    {% endfor %}
+                {% else %}
+                    <h3>You have no messages in your outbox!</h3>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+
+{% endblock %}
