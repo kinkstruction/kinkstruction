@@ -9,18 +9,22 @@ DEBUG = True
 SQLALCHEMY_DATABASE_URI = "postgresql://postgres:postgres@localhost/kinkstruction"
 SQLALCHEMY_MIGRATE_REPO = os.path.join(basedir, 'db_repository')
 
-# with open(".secret") as f:
-#     for line in f:
-#         line = line.strip()
-#         if not re.match("^\s*$", line):
-#             key, val = re.split(r"\s*=\s*", line, maxsplit=1)
-#             os.environ[key] = str(val)
-#
-# SECRET_KEY = os.environ["SECRET_KEY"]
-# ITSDANGEROUS_SECRET_KEY = os.environ["ITSDANGEROUS_SECRET_KEY"]
-
-
 USER_ROLES = {
     "User": 0,
     "Admin": 1
 }
+
+HTTP_500_POEMS = [
+"""
+There once was a page on Kinkstruction,
+Through your monitor you wanted to unction,
+But 500, oh noes!
+The server has woes!
+It cannot fulfill its main function.
+""",
+"""
+The status returned
+HTTP 500
+Server done fucked up
+"""
+]
