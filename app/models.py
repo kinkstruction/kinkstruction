@@ -16,17 +16,17 @@ class Message(db.Model):
         db.CheckConstraint("to_user_id != from_user_id"),
     )
 
-    def from_username(self):
+    def from_user(self):
         user = User.query.filter_by(id=self.from_user_id).first()
         if user is not None:
-            return user.username
+            return user
         else:
             return None
 
-    def to_username(self):
+    def to_user(self):
         user = User.query.filter_by(id=self.to_user_id).first()
         if user is not None:
-            return user.username
+            return user
         else:
             return None
 

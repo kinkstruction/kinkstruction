@@ -1,15 +1,22 @@
 {% extends "base.html" %}
 {% block content %}
-    <h2>{{message.title}}</h2>
+<div class="well col-md-11">
+    <h6>"{{message.title}}"</h6>
     <p>
-        <h3>From: </h3> {{message.from_username()}}
+        <strong>From: </strong> {{message.from_user().username}}
     </p>
     <p>
-        <h3>Sent: </h3> {{message.sent_timestamp}}
+        <strong>Sent: </strong> {{message.sent_timestamp}}
     </p>
-
+    <div class="well">
 {% filter markdown %}
 {{message.body}}
 {% endfilter %}
+    </div>
+
+</div>
+<div class="col-md-1">
+    <a href="{{url_for('message_reply', id=message.id)}}"<i class="fa fa-reply"></i></a>
+</div>
 
 {% endblock %}
