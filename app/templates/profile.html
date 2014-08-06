@@ -7,6 +7,11 @@
             <p>
                 {{user.age_gender_role()}}
             </p>
+            {% if user.orientation %}
+                <p>
+                    Orientation: {{user.orientation}}
+                </p>
+            {% endif %}
             <p>
                 Joined <span class="from-now">{{user.created}}</span>
             </p>

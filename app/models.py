@@ -65,6 +65,7 @@ class User(db.Model):
     age = db.Column(db.Integer)
     gender = db.Column(db.String(24))
     role = db.Column(db.String(24))
+    orientation = db.Column(db.String(24))
     bio = db.Column(db.String)
     email = db.Column(db.String, nullable=False)
     created = db.Column(db.DateTime, default=datetime.utcnow())

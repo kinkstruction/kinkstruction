@@ -60,6 +60,7 @@ class EditProfileForm(Form):
 
     gender = StringField('Gender: ', validators=[Optional(), Length(max=24)])
     role = StringField('Role: ', validators=[Optional(), Length(max=24)])
+    orientation = StringField('Orientation: ', validators=[Optional(), Length(max=24)])
     bio = TextAreaField('About Yourself: ', validators=[Optional()])
 
 

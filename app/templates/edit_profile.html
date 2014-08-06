@@ -75,6 +75,16 @@
             </div>
 
             <div class="form-group">
+                {{form.orientation.label(class_="col-md-2 control-label")}}
+                <div class="col-md-10">
+                    {{form.orientation(size=12, maxlength=24)}}
+                    {% for error in form.errors.orientation %}
+                        <span class="text-danger">[{{error}}]</span><br>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="form-group">
                 {{form.bio.label(class_="col-md-2 control-label")}}
                 <div class="col-md-10">
                     {{form.bio(cols=48, rows=12)}}
