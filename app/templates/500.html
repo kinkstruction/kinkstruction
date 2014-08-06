@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+<blockquote>
+    {% filter markdown %}
+{{poem}}
+    {% endfilter %}
+
+</blockquote>
+
+<div class="jumbotron">
+    <h1>There seems to be a bit of a problem...</h1>
+
+    <p>
+        Our apologies. A server error of some kind has occurred. Either wait it out and try again a bit later, or contact the site administrator (<code>admin [at] kinkstruction [dot] com</code>) and report it.
+    </p>
+</div>
+{% endblock %}

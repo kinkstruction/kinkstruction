@@ -4,6 +4,8 @@ from flask.ext.login import login_user, logout_user, current_user, login_require
 from app.models import User, Task, Message
 from forms import *
 from markdown import markdown
+from config import HTTP_500_POEMS
+from random import choice
 import re
 
 verify_flash_msg = r'You need to verify your email address to continue. Please look for an email from <i>verifications@kinkstruction.com</i>. <a href="/resend_verification_email">Click here to resend the email</a>.'
@@ -294,3 +296,15 @@ def message_reply(id):
 def check_username():
     username = request.values.get("username")
     return User.query.filter_by(username=username).count()
+
+
+# 500 error handler
+@app.errorhandler(500)
+def server_error(e):
+    return render_template("500.html", poem=choice(HTTP_500_POEMS)), 500
+
+
+# To test the 500 page
+@app.route("/500", methods=['GET', 'POST'])
+def five_hundred():
+    return render_template("500.html", poem=choice(HTTP_500_POEMS))

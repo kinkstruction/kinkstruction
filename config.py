@@ -17,14 +17,20 @@ USER_ROLES = {
 HTTP_500_POEMS = [
 """
 There once was a page on Kinkstruction,
+
 Through your monitor you wanted to unction,
+
 But 500, oh noes!
+
 The server has woes!
+
 It cannot fulfill its main function.
 """,
 """
 The status returned
+
 HTTP 500
+
 Server done fucked up
 """
 ]
