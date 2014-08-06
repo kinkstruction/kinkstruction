@@ -83,7 +83,7 @@ class User(db.Model):
         return Message.query.filter_by(from_user_id=self.id).order_by(Message.sent_timestamp.desc()).all()
 
     def num_unread_messages(self):
-        return Message.query.filter_by(to_user_id=self.id).filter(not Message.is_read).count()
+        return Message.query.filter_by(to_user_id=self.id).filter(~Message.is_read).count()
 
     def age_gender_role(self):
         return " ".join([str(x) if x is not None else "" for x in [self.age, self.gender, self.role]])

@@ -3,7 +3,7 @@
 <div class="well col-md-11">
     <h6>"{{message.title}}"</h6>
     <p>
-        <strong>From: </strong> {{message.from_user().username}}
+        <strong>From: </strong> <a href="{{url_for('profile_page', id=message.from_user_id)}}">{{message.from_user().username}}</a>
     </p>
     <p>
         <strong>Sent: </strong> {{message.sent_timestamp}}

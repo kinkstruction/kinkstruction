@@ -13,11 +13,7 @@
             <ul class="list-group">
                 {% if inbox_messages %}
                     {% for message in inbox_messages %}
-                        <li class="list-group-item">
-                            <p>From: <a href="{{url_for('profile_page', id=message.from_user_id)}}">{{message.from_user().username}}</a></p>
-                            <p>Sent: {{message.sent_timestamp}}</p>
-                            <p>Title: <a href="{{url_for('view_message', id=message.id)}}">{{message.title}}</a></p>
-                        </li>
+                        {% include "message_list_item.html" %}
                     {% endfor %}
                 {% else %}
                     <h3>You have no messages in your inbox!</h3>
@@ -28,11 +24,7 @@
             <ul class="list-group">
                 {% if outbox_messages %}
                     {% for message in outbox_messages %}
-                        <li class="list-group-item">
-                            <p>To: <a href="{{url_for('profile_page', id=message.to_user_id)}}">{{message.to_user().username}}</a></p>
-                            <p>Sent: {{message.sent_timestamp}}</p>
-                            <p>Title: <a href="{{url_for('view_message', id=message.id)}}">{{message.title}}</a></p>
-                        </li>
+                        {% include "message_list_item.html" %}
                     {% endfor %}
                 {% else %}
                     <h3>You have no messages in your outbox!</h3>

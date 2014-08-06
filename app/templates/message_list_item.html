@@ -1,0 +1,5 @@
+<a class="list-group-item" href="{{url_for('view_message', id=message.id)}}">
+    <p>From: {{message.from_user().username}}</p>
+    <p>Sent: {{message.sent_timestamp}}</p>
+    <p>Title: {{message.title}}</p>
+</a>

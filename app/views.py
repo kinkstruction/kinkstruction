@@ -223,6 +223,11 @@ def view_message(id):
         flash("Unable to display that message.")
         return redirect(url_for('index'))
 
+    if not message.is_read:
+        message.is_read = True
+        db.session.add(message)
+        db.session.commit()
+
     return render_template('view_message.html', message=message)
 
 
