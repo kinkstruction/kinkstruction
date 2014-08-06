@@ -223,6 +223,11 @@ def view_message(id):
         flash("Unable to display that message.")
         return redirect(url_for('index'))
 
+    if not message.is_read:
+        message.is_read = True
+        db.session.add(message)
+        db.session.commit()
+
     return render_template('view_message.html', message=message)
 
 
@@ -251,6 +256,38 @@ def new_message(id):
             return redirect(url_for('index'))
         else:
             return render_template('new_message.html', user=user, form=form)
+
+
+@app.route("/message/reply/<int:id>", methods=['GET', 'POST'])
+@login_required
+def message_reply(id):
+    original = Message.query.filter_by(id=id).first()
+    if original is None:
+        flash("Unable to reply to that message: no such message found!")
+        return redirect(url_for('index'))
+
+    form = NewMessageForm()
+
+    if form.validate_on_submit():
+        message = Message(
+            from_user_id=g.user.id,
+            to_user_id=original.from_user().id,
+            title=form.title.data,
+            body=form.body.data
+        )
+
+        db.session.add(message)
+        db.session.commit()
+
+        flash("Message sent!")
+        return redirect(url_for('messages'))
+    else:
+        new_title = "Re:" + original.title
+        if len(new_title) > 256:
+            new_title = new_title[0:256]
+        form.title.data = new_title
+
+        return render_template("new_message.html", user=original.from_user(), form=form)
 
 
 @app.route("/check_username", methods=['POST'])

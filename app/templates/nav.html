@@ -14,9 +14,8 @@
                 <li class="active">
                     <a href="{{url_for('messages')}}">
                         <i class="fa fa-envelope-o">
-                            {% set num_unread_messages = g.user.num_unread_messages() %}
-                            {% if num_unread_messages > 0 %}
-                                <span class="badge">{{num_unread_messages}}</span>
+                            {% if g.user.num_unread_messages() %}
+                                <span class="badge">{{g.user.num_unread_messages()}}</span>
                             {% endif %}
                         </i>
                     </a>
