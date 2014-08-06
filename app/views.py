@@ -131,6 +131,7 @@ def edit_profile():
         form.age.data = g.user.age if g.user.age is not None else ""
         form.gender.data = g.user.gender if g.user.gender is not None else ""
         form.role.data = g.user.role if g.user.role is not None else ""
+        form.orientation.data = g.user.orientation if g.user.orientation is not None else ""
         form.bio.data = g.user.bio if g.user.bio is not None else ""
 
         return render_template('edit_profile.html', form=form)

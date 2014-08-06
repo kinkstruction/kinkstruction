@@ -4,16 +4,24 @@ from config import *
 from flask.ext.mail import Message
 from jinja2 import Template
 from decorators import fire_and_forget
-import os
 
 
-class VerificationMailer(object):
+class AbstractMailer(object):
     def __init__(self, app, mail):
         self.app = app
         self.mail = mail
         self.signer = Signer(ITSDANGEROUS_SECRET_KEY)
 
     def get_template(self, user):
+        raise Exception("The method get_template() in AbstractMailer must be overridden!")
+
+    def send_mail(self, username, email):
+        raise Exception("The method send_mail() in AbstractMailer must be overridden!")
+
+
+class VerificationMailer(AbstractMailer):
+
+    def get_template(self):
         return """
         <p>
             Dear {{username}},
@@ -40,7 +48,7 @@ class VerificationMailer(object):
 
         with self.app.app_context():
 
-            template = self.get_template("/templates/mail_sign_in.html")
+            template = self.get_template()
             msg = Message('Kinkstruction Confirmation',
                        sender='verifications@kinkstruction.com',
                        recipients=[email])
