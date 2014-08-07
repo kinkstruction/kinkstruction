@@ -43,4 +43,4 @@ Oh dear gods, *yes*! Pull requests are more than welcome. Besides creating an is
 
 ## When can I sign up and start using the site?
 
-I'm still working on an MVP (minimum viable product) right now. However, I have a day job, so I can't hack away at Kinkstruction as much as I'd like. I'm roughly aiming to have the MVP up and running by September 15 (that's a rough ETA, however).
+I'm still working on an MVP (minimum viable product) right now. However, I have a day job, so I can't hack away at Kinkstruction as much as I'd like. I'm roughly aiming to have the MVP up and running by ~~September 15~~ the end of September (that's a rough ETA, however).
