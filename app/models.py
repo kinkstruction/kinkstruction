@@ -60,14 +60,14 @@ class Task(db.Model):
 class User(db.Model):
     __tablename__ = "users"
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String, index=True)
+    username = db.Column(db.String, index=True, unique=True)
     pw_hash = db.Column(db.String, index=True)
     age = db.Column(db.Integer)
     gender = db.Column(db.String(24))
     role = db.Column(db.String(24))
     orientation = db.Column(db.String(24))
     bio = db.Column(db.String)
-    email = db.Column(db.String, nullable=False)
+    email = db.Column(db.String, nullable=False, unique=True)
     created = db.Column(db.DateTime, default=datetime.utcnow())
     user_role = db.Column(db.Integer, default=0)
     is_validated = db.Column(db.Boolean, default=False)
