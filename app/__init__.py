@@ -5,7 +5,7 @@ from flask.ext.mail import Mail
 from flask.ext.login import LoginManager
 from flask.ext.script import Manager
 from flask.ext.migrate import Migrate, MigrateCommand
-from verification_mailer import VerificationMailer
+from mailer import VerificationMailer, ResetPasswordMailer
 from flaskext.markdown import Markdown
 
 
@@ -15,6 +15,7 @@ db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
 mail = Mail(app)
 verificationMailer = VerificationMailer(app, mail)
+passwordMailer = ResetPasswordMailer(app, mail)
 
 lm = LoginManager()
 lm.init_app(app)
@@ -34,4 +35,4 @@ else:
 # for key in sorted(app.config.keys()):
 #     print key + ": " + str(app.config.get(key))
 
-from app import views, models, verificationMailer, mail
+from app import views, models, verificationMailer, passwordMailer, mail

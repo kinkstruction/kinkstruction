@@ -4,6 +4,36 @@ from wtforms.validators import *
 from app.models import User, Task
 
 
+class ResetPasswordForm(Form):
+
+    password = PasswordField('Password: ',
+        validators=[
+            Optional(),
+            Length(min=2, max=256, message="Passwords must be between 2 and 256 characters")
+        ]
+    )
+
+    new_password = PasswordField('Password: ',
+        validators=[
+            Optional(),
+            Length(min=2, max=256, message="Passwords must be between 2 and 256 characters")
+        ]
+    )
+
+    confirm_password = PasswordField('Confirm Password: ', validators=[EqualTo('new_password', message="The passwords do not match")])
+
+
+class ResetPasswordFromEmailForm(Form):
+    password = PasswordField('Password: ',
+        validators=[
+            Optional(),
+            Length(min=2, max=256, message="Passwords must be between 2 and 256 characters")
+        ]
+    )
+
+    confirm_password = PasswordField('Confirm Password: ', validators=[EqualTo('password', message="The passwords do not match")])
+
+
 class NewMessageForm(Form):
     title = StringField('Title: ',
         validators=[Required(), Length(max=256)]

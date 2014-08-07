@@ -71,6 +71,8 @@ class User(db.Model):
     created = db.Column(db.DateTime, default=datetime.utcnow())
     user_role = db.Column(db.Integer, default=0)
     is_validated = db.Column(db.Boolean, default=False)
+    password_reset_token = db.Column(db.String)
+    password_reset_token_expiration = db.Column(db.DateTime)
     __table_args__ = (
         db.UniqueConstraint('username'),
         db.UniqueConstraint('email'),

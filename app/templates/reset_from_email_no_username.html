@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+    <form class="form-horizontal" action="/reset_from_email_no_username" method="post">
+        <fieldset>
+            <legend>Please enter your username:</legend>
+
+            <input type="text" name="username" size="20" maxlength="256">
+
+        </fieldset>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-primary">Proceed</button>
+        </div>
+    </form>
+{% endblock %}

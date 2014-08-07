@@ -1,4 +1,4 @@
-from app import app, db, lm, bcrypt, verificationMailer
+from app import app, db, lm, bcrypt, verificationMailer, passwordMailer
 from flask import render_template, g, url_for, session, flash, redirect, request, Markup
 from flask.ext.login import login_user, logout_user, current_user, login_required, AnonymousUserMixin
 from app.models import User, Task, Message
@@ -7,6 +7,8 @@ from markdown import markdown
 from config import HTTP_500_POEMS
 from random import choice
 import re
+import uuid
+from datetime import datetime, date, timedelta
 
 verify_flash_msg = r'You need to verify your email address to continue. Please look for an email from <i>verifications@kinkstruction.com</i>. <a href="/resend_verification_email">Click here to resend the email</a>.'
 
@@ -60,6 +62,100 @@ def not_validated():
 def index():
 
     return render_template("index.html")
+
+
+@app.route("/reset", methods=['GET', 'POST'])
+@login_required
+def reset_password():
+    form = ResetPasswordForm()
+
+    if form.validate_on_submit():
+        current_password = form.password.data
+        new_password = form.new_password.data
+
+        if bcrypt.check_password_hash(g.user.pw_hash, current_password):
+            g.user.pw_hash = bcrypt.generate_password_hash(new_password)
+            db.session.add(g.user)
+            db.session.commit()
+
+            flash("Your password has been successfully changed!")
+            return redirect(url_for("profile_page", id=g.user.id))
+        else:
+            flash("Your current password is incorrect. Please try again.")
+
+    return render_template("reset_password.html", form=form)
+
+
+@app.route("/reset_from_email_no_username", methods=['GET', 'POST'])
+def reset_from_email_no_username():
+    username = request.values.get("username")
+
+    if username is None:
+        return render_template("reset_from_email_no_username.html")
+    else:
+        user = User.query.filter_by(username=username).first()
+
+        if user is None:
+            flash("No user found with a username of '%s'" % username)
+            return render_template("reset_from_email_no_username.html")
+        else:
+            return redirect(url_for('reset_password_from_email', username=username))
+
+
+@app.route("/reset_from_email_no_token/<username>", methods=['GET', 'POST'])
+def reset_password_from_email(username):
+
+    user = User.query.filter_by(username=username).first()
+
+    if user is None:
+        flash("User '%s' not found" % username)
+        return redirect(url_for("index"))
+
+    token = str(uuid.uuid4())
+    expiration = datetime.utcnow() + timedelta(1)
+    user.password_reset_token = token
+    user.password_reset_token_expiration = expiration
+    db.session.add(user)
+    db.session.commit()
+
+    passwordMailer.send_mail(user.username, user.email, token)
+
+    pw_reset_flash_msg = r'Email sent! Check your email for instructions on how to change your password.'
+    flash(pw_reset_flash_msg)
+    return redirect(url_for('index'))
+
+
+@app.route("/reset_from_email", methods=['GET', 'POST'])
+def reset_password_from_email_with_token():
+
+    token = request.values.get("token")
+
+    form = ResetPasswordFromEmailForm()
+
+    if token is None:
+        flash("No token provided!")
+        return redirect(url_for("index"))
+    else:
+        user = User.query.filter_by(password_reset_token=token).first()
+        if user is None:
+            flash("No user found with token '%s'" & token)
+            return redirect(url_for("index"))
+        else:
+            delta = user.password_reset_token_expiration - datetime.utcnow()
+            if delta < timedelta(1) and delta >= timedelta(0):
+                if form.validate_on_submit():
+                    user.pw_hash = bcrypt.generate_password_hash(form.password.data)
+                    db.session.add(user)
+                    db.session.commit()
+                    g.user = user
+                    login_user(g.user)
+                    flash("Your password was successfully changed!")
+                    return redirect(url_for("index"))
+                else:
+                    return render_template("reset_password_from_email.html", form=form)
+            else:
+                flash("Token has expired!")
+                return redirect(url_for("index"))
 
 
 @app.route("/login", methods=['GET', 'POST'])
