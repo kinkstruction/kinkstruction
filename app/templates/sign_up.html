@@ -1,34 +1,6 @@
 {% from "_macros.html" import form_group_field %}
 {% extends "base.html" %}
 {% block content %}
-    <script type="text/javascript">
-        $(document).ready(function(){
-            $('#username').change(function() {
-                var username = $('#username').val();
-                if(!username){
-                    return false;
-                }
-
-                $("#username_error_msg").val("")
-                $.ajax({
-                  url: "/check_username",
-                  type: 'POST',
-                  data: JSON.stringify({"username": username}, null, '\t'),
-                  contentType: 'application/json;charset=UTF-8',
-                  success: function(result){ //Returns the number of users with the given username
-                            console.log("Got result " + result);
-                             if(parseInt(result)){
-                                 $("#username_error_msg").val("Sorry! The name '" + username + "' is already taken.")
-                                 $("#username").val("");
-                             }
-                             else{
-                                 $("#username_error_msg").val("")
-                             }
-                           }
-                  });
-            });
-        });
-    </script>
 
 <form class="form-horizontal" action="" method="post">
     {{form.hidden_tag()}}
@@ -36,7 +8,6 @@
         <legend>Please provide some information:</legend>
 
         {{form_group_field(form.username, size=20, maxlength=256)}}
-        <span id="username_error_msg" class="text-danger"></span>
         {{form_group_field(form.password, size=20, maxlength=256)}}
         {{form_group_field(form.confirm_password, size=20, maxlength=256)}}
         {{form_group_field(form.email, size=20, maxlength=256)}}
