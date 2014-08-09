@@ -246,6 +246,23 @@ def sign_up():
         form_data["pw_hash"] = bcrypt.generate_password_hash(form_data.pop("password"))
 
         username = form_data["username"]
+        email = form_data["email"]
+
+        # Before we go any farther, we have to find out if the username and email aren't being
+        # currently used.
+
+        if User.query.filter_by(username=username).count():
+            flash("Sorry, but the username '%s' is taken" % username)
+            form.data.pop("username")
+            return render_template("sign_up.html", form=form, title="Kinkstruction Registration")
+
+        if User.query.filter_by(email=email).count():
+            message = Markup('Sorry, but there seems to already be a user with an email address of \'%s\'. If this is you, then please <a href="/login">log in!</a>' % email)
+            flash(message)
+            form.data.pop("email")
+            return render_template("sign_up.html", form=form, title="Kinkstruction Registration")
+
+        # If we haven't seen the username or password before, then we're golden!
 
         u = User(**form_data)
         db.session.add(u)
@@ -387,12 +404,6 @@ def message_reply(id):
         form.title.data = new_title
 
         return render_template("new_message.html", user=original.from_user(), form=form)
-
-
-@app.route("/check_username", methods=['POST'])
-def check_username():
-    username = request.values.get("username")
-    return User.query.filter_by(username=username).count()
 
 
 # 500 error handler
