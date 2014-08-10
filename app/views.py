@@ -67,7 +67,12 @@ def index():
 @app.route("/friends", methods=['GET', 'POST'])
 @login_required
 def friends():
-    return render_template("friends.html")
+    friend_request_page = int(request.values.get("friend_request_page", 1))
+    friend_page = int(request.values.get("friend_page", 1))
+
+    friend_requests = g.user.users_sending_friend_requests.paginate(friend_request_page, NUM_FRIENDS_PER_PAGE, False)
+    friends = g.user.friends.paginate(friend_page, NUM_FRIENDS_PER_PAGE, False)
+    return render_template("friends.html", friends=friends, friend_requests=friend_requests)
 
 
 @app.route("/friends/accept/<int:id>", methods=['GET', 'POST'])

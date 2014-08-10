@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 {% block content %}
-    {% if g.user.users_sending_friend_requests.count() %}
+    {% if friend_requests.items %}
         <h3>New Friend Requests</h3>
         <ul class="list-group">
-            {% for user in g.user.users_sending_friend_requests.all() %}
+            {% for user in friend_requests.items %}
                 <li class="list-group-item">
                     {{user.username}}  <a href="{{url_for('accept_friend_request', id=user.id)}}" type="button" class="btn btn-primary">Accept</a>
                         <a href="{{url_for('reject_friend_request', id=user.id)}}" type="button" class="btn btn-primary">Reject</a>
@@ -11,12 +11,33 @@
             {% endfor %}
         </ul>
 
+        <div class="left">
+            {% if friend_requests.has_prev %}
+                <a href="{{url_for('friends', friend_request_page=friend_requests.prev_num, friend_page=friends.page)}}">
+                    <span class="badge"><i class="fa fa-arrow-left"></i> Newer</span>
+                </a>
+            {% else %}
+                <i class="fa fa-arrow-left"></i> Newer
+            {% endif %}
+        </div>
+
+        <div class="right">
+            {% if friend_requests.has_next %}
+                <a href="{{url_for('friends', friend_request_page=friend_requests.next_num, friend_page=friends.page)}}">
+                    <span class="badge">Older<i class="fa fa-arrow-right"></i></span>
+                </a>
+            {% else %}
+                <span class="badge disabled">Older<i class="fa fa-arrow-right"></i></span>
+            {% endif %}
+        </div>
+        <div class="clear"></div>
+
     {% endif %}
 
     {% if g.user.friends.count() %}
         <h3>Your Friends</h3>
         <ul class="list-group">
-            {% for user in g.user.friends %}
+            {% for user in friends.items %}
                 <li class="list-group-item">
                     <a href="{{url_for('profile_page', id=user.id)}}">
                         {{user.username}}
@@ -24,6 +45,27 @@
                 </li>
             {% endfor %}
         </ul>
+
+        <div class="left">
+            {% if friends.has_prev %}
+                <a href="{{url_for('friends', friend_request_page=friend_requests.page, friend_page=friends.prev_num)}}">
+                    <span class="badge"><i class="fa fa-arrow-left"></i> Newer</span>
+                </a>
+            {% else %}
+                <i class="fa fa-arrow-left"></i> Newer
+            {% endif %}
+        </div>
+
+        <div class="right">
+            {% if friends.has_next %}
+                <a href="{{url_for('friends', friend_request_page=friend_requests.page, friend_page=friends.next_num)}}">
+                    <span class="badge">Older <i class="fa fa-arrow-right"></i></span>
+                </a>
+            {% else %}
+                <span class="badge disabled">Older <i class="fa fa-arrow-right"></i></span>
+            {% endif %}
+        </div>
+        <div class="clear"></div>
     {% else %}
         <div class="well">
             <h3>It appears as though you don't have any friends, yet...</h3>
