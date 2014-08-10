@@ -29,8 +29,8 @@ class Message(db.Model):
     __tablename__ = "messages"
     id = db.Column(db.Integer, primary_key=True)
     sent_timestamp = db.Column(db.DateTime, default=datetime.utcnow, index=True)
-    to_user_id = db.Column(db.Integer, nullable=False)
-    from_user_id = db.Column(db.Integer, nullable=False)
+    to_user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+    from_user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     title = db.Column(db.String, index=True)
     body = db.Column(db.String, nullable=False, index=True)
     is_read = db.Column(db.Boolean, default=False)
@@ -62,8 +62,8 @@ class Task(db.Model):
     created = db.Column(db.DateTime, default=datetime.utcnow, index=True)
     end_timestamp = db.Column(db.DateTime, default=datetime.utcnow, index=True)
     description = db.Column(db.String, nullable=False, index=True)
-    requester_id = db.Column(db.Integer, nullable=False)
-    doer_id = db.Column(db.Integer, nullable=False)
+    requester_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+    doer_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     is_active = db.Column(db.Boolean, default=True)
     __table_args__ = (
         db.CheckConstraint("requester_id != doer_id"),
