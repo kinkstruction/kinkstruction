@@ -9,6 +9,9 @@ class FriendRequest(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     friend_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     created = db.Column(db.DateTime, default=datetime.utcnow)
+    __table_args__ = (
+        db.CheckConstraint("user_id != friend_id"),
+    )
 
 
 class Friend(db.Model):
@@ -17,6 +20,9 @@ class Friend(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     friend_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     created = db.Column(db.DateTime, default=datetime.utcnow)
+    __table_args__ = (
+        db.CheckConstraint("user_id != friend_id"),
+    )
 
 
 class Message(db.Model):
@@ -89,17 +95,25 @@ class User(db.Model):
     is_validated = db.Column(db.Boolean, default=False)
     password_reset_token = db.Column(db.String)
     password_reset_token_expiration = db.Column(db.DateTime)
+    users_sending_friend_requests = db.relationship('User',
+        secondary="friend_requests",
+        primaryjoin=(FriendRequest.friend_id == id),
+        secondaryjoin=(FriendRequest.user_id == id),
+        backref=db.backref("users_with_pending_friend_requests", lazy="dynamic"),
+        lazy="dynamic"
+    )
     __table_args__ = (
         db.UniqueConstraint('username'),
         db.UniqueConstraint('email'),
         db.CheckConstraint('age is null or (age >= 18 and age <= 100)')
     )
 
-    def get_all_friend_requests(self):
-        return db.session.query(friend_requests).filter_by(user_id=self.id)
+    def get_users_sending_friend_requests(self):
+        # return db.session.query(User, FriendRequest).join(FriendRequest, User.id == FriendRequest.user_id).filter(FriendRequest.friend_id == self.id).all()
+        pass
 
     def get_all_friends(self):
-        return db.session.query(friends).filter_by(user_id=self.id)
+        return db.session.query(User).join(Friend, User.id == Friend.friend_id).filter_by(user_id=self.id).all()
 
     def get_all_inbox_messages(self):
         return Message.query.filter_by(to_user_id=self.id).order_by(Message.sent_timestamp.desc()).all()
