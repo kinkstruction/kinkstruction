@@ -102,6 +102,12 @@ class User(db.Model):
         backref=db.backref("users_with_pending_friend_requests", lazy="dynamic"),
         lazy="dynamic"
     )
+    friends = db.relationship('User',
+        secondary="friends",
+        primaryjoin=(Friend.user_id == id),
+        secondaryjoin=(Friend.friend_id == id),
+        lazy="dynamic"
+    )
     __table_args__ = (
         db.UniqueConstraint('username'),
         db.UniqueConstraint('email'),
@@ -152,4 +158,4 @@ class User(db.Model):
         return unicode(self.id)
 
     def __repr__(self):
-        return "<User '%r'>" % (self.name)
+        return "<User '%r'>" % (self.username)
