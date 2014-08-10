@@ -3,25 +3,26 @@ from app import db
 from datetime import datetime, date
 
 
-friend_requests = db.Table('friend_requests',
-    db.Column('id', db.Integer, primary_key=True),
-    db.Column('user_id', db.Integer, db.ForeignKey('users.id')),
-    db.Column('friend_id', db.Integer, db.ForeignKey('users.id')),
-    db.Column('created', db.DateTime, default=datetime.utcnow)
-)
+class FriendRequest(db.Model):
+    __tablename__ = "friend_requests"
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    friend_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    created = db.Column(db.DateTime, default=datetime.utcnow)
 
-friends = db.Table('friends',
-    db.Column('id', db.Integer, primary_key=True),
-    db.Column('user_id', db.Integer, db.ForeignKey('users.id')),
-    db.Column('friend_id', db.Integer, db.ForeignKey('users.id')),
-    db.Column('created', db.DateTime, default=datetime.utcnow)
-)
+
+class Friend(db.Model):
+    __tablename__ = "friends"
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    friend_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    created = db.Column(db.DateTime, default=datetime.utcnow)
 
 
 class Message(db.Model):
     __tablename__ = "messages"
     id = db.Column(db.Integer, primary_key=True)
-    sent_timestamp = db.Column(db.DateTime, default=datetime.utcnow(), index=True)
+    sent_timestamp = db.Column(db.DateTime, default=datetime.utcnow, index=True)
     to_user_id = db.Column(db.Integer, nullable=False)
     from_user_id = db.Column(db.Integer, nullable=False)
     title = db.Column(db.String, index=True)
@@ -52,8 +53,8 @@ class Message(db.Model):
 class Task(db.Model):
     __tablename__ = "task"
     id = db.Column(db.Integer, primary_key=True)
-    created = db.Column(db.DateTime, default=datetime.utcnow(), index=True)
-    end_timestamp = db.Column(db.DateTime, default=datetime.utcnow(), index=True)
+    created = db.Column(db.DateTime, default=datetime.utcnow, index=True)
+    end_timestamp = db.Column(db.DateTime, default=datetime.utcnow, index=True)
     description = db.Column(db.String, nullable=False, index=True)
     requester_id = db.Column(db.Integer, nullable=False)
     doer_id = db.Column(db.Integer, nullable=False)
@@ -83,7 +84,7 @@ class User(db.Model):
     orientation = db.Column(db.String(24))
     bio = db.Column(db.String)
     email = db.Column(db.String, nullable=False, unique=True)
-    created = db.Column(db.DateTime, default=datetime.utcnow())
+    created = db.Column(db.DateTime, default=datetime.utcnow)
     user_role = db.Column(db.Integer, default=0)
     is_validated = db.Column(db.Boolean, default=False)
     password_reset_token = db.Column(db.String)
@@ -93,6 +94,12 @@ class User(db.Model):
         db.UniqueConstraint('email'),
         db.CheckConstraint('age is null or (age >= 18 and age <= 100)')
     )
+
+    def get_all_friend_requests(self):
+        return db.session.query(friend_requests).filter_by(user_id=self.id)
+
+    def get_all_friends(self):
+        return db.session.query(friends).filter_by(user_id=self.id)
 
     def get_all_inbox_messages(self):
         return Message.query.filter_by(to_user_id=self.id).order_by(Message.sent_timestamp.desc()).all()
