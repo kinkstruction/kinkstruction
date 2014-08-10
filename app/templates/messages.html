@@ -2,35 +2,85 @@
 {% extends "base.html" %}
 {% block content %}
     <ul class="nav nav-tabs">
-        <li class="active">
+        {% if view == "inbox" %}
+            <li class="active">
+        {% else %}
+            <li>
+        {% endif %}
             <a href="#inbox" data-toggle="tab">Inbox</a>
         </li>
-        <li>
+        {% if view == "outbox" %}
+            <li class="active">
+        {% else %}
+            <li>
+        {% endif %}
             <a href="#outbox" data-toggle="tab">Outbox</a>
         </li>
     </ul>
     <div id="messageBoxContent" class="tab-content">
         <div class="tab-pane fade active in" id="inbox">
             <ul class="list-group">
-                {% if inbox_messages %}
-                    {% for message in inbox_messages %}
+                {% if inbox_messages.items %}
+                    {% for message in inbox_messages.items %}
                         {{ message_item(message) }}
                     {% endfor %}
                 {% else %}
                     <h3>You have no messages in your inbox!</h3>
                 {% endif %}
             </ul>
+            
+            <div class="left">
+                {% if inbox_messages.has_prev%}
+                    <a href="{{url_for('messages', inbox=inbox_messages.prev_num, outbox=outbox_messages.page, view='inbox')}}">
+                        <i class="fa fa-arrow-circle-o-left fa-2x"></i>Newer Inbox Messages
+                    </a>
+                {% else %}
+                    <i class="fa fa-arrow-circle-o-left fa-2x"></i>Newer Inbox Messages
+                {% endif %}
+            </div>
+
+            <div class="right">
+                {% if inbox_messages.has_next %}
+                    <a href="{{url_for('messages', inbox=inbox_messages.next_num, outbox=outbox_messages.page, view='inbox')}}">
+                        Older Inbox Messages<i class="fa fa-arrow-circle-o-right fa-2x"></i>
+                    </a>
+                {% else %}
+                    Older Inbox Messages<i class="fa fa-arrow-circle-o-right fa-2x"></i>
+                {% endif %}
+            </div>
+            <div class="clear"></div>
+
         </div>
         <div class="tab-pane fade" id="outbox">
             <ul class="list-group">
-                {% if outbox_messages %}
-                    {% for message in outbox_messages %}
+                {% if outbox_messages.items %}
+                    {% for message in outbox_messages.items %}
                         {{ message_item(message, inbox=False) }}
                     {% endfor %}
                 {% else %}
                     <h3>You have no messages in your outbox!</h3>
                 {% endif %}
             </ul>
+
+            <div class="left">
+                {% if outbox_messages.has_prev %}
+                    <a href="{{url_for('messages', outbox=outbox_messages.prev_num, inbox=inbox_messages.page, view='outbox')}}">
+                        <i class="fa fa-arrow-circle-o-left fa-2x"></i>Newer Outbox Messages
+                    </a>
+                {% else %}
+                    <i class="fa fa-arrow-circle-o-left fa-2x left"></i>Newer Outbox Messages
+                {% endif %}
+            </div>
+            <div class="right">
+                {% if outbox_messages.has_next %}
+                    <a class="right" href="{{url_for('messages', outbox=outbox_messages.next_num, inbox=inbox_messages.page, view='outbox')}}">
+                        Older Outbox Messages<i class="fa fa-arrow-circle-o-right fa-2x"></i>
+                    </a>
+                {% else %}
+                    <span class="right">Older Outbox Messages<i class="fa fa-arrow-circle-o-right fa-2x"></i></span>
+                {% endif %}
+            </div>
+            <div class="clear"></div>
         </div>
     </div>
 

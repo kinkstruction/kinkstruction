@@ -114,11 +114,11 @@ class User(db.Model):
         db.CheckConstraint('age is null or (age >= 18 and age <= 100)')
     )
 
-    def get_all_inbox_messages(self):
-        return Message.query.filter_by(to_user_id=self.id).order_by(Message.sent_timestamp.desc()).all()
+    def inbox_messages(self):
+        return Message.query.filter_by(to_user_id=self.id).order_by(Message.sent_timestamp.desc())
 
-    def get_all_outbox_messages(self):
-        return Message.query.filter_by(from_user_id=self.id).order_by(Message.sent_timestamp.desc()).all()
+    def outbox_messages(self):
+        return Message.query.filter_by(from_user_id=self.id).order_by(Message.sent_timestamp.desc())
 
     def num_unread_messages(self):
         return Message.query.filter_by(to_user_id=self.id).filter(~Message.is_read).count()

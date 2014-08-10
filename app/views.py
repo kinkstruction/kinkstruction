@@ -4,7 +4,7 @@ from flask.ext.login import login_user, logout_user, current_user, login_require
 from app.models import User, Friend, FriendRequest, Message, Task
 from forms import *
 from markdown import markdown
-from config import HTTP_500_POEMS
+from config import HTTP_500_POEMS, NUM_MESSAGES_PER_PAGE, NUM_FRIENDS_PER_PAGE
 from random import choice
 import re
 import uuid
@@ -405,10 +405,17 @@ def verify_email():
 @app.route("/messages", methods=['GET', 'POST'])
 @login_required
 def messages():
-    inbox_messages = g.user.get_all_inbox_messages()
-    outbox_messages = g.user.get_all_outbox_messages()
+    inbox_page = int(request.values.get("inbox", 1))
+    outbox_page = int(request.values.get("outbox", 1))
+    view = request.values.get("view", "inbox")
 
-    return render_template("messages.html", inbox_messages=inbox_messages, outbox_messages=outbox_messages)
+    if view != "outbox":
+        view = "inbox"
+
+    inbox_messages = g.user.inbox_messages().paginate(inbox_page, NUM_MESSAGES_PER_PAGE, False)
+    outbox_messages = g.user.outbox_messages().paginate(outbox_page, NUM_MESSAGES_PER_PAGE, False)
+
+    return render_template("messages.html", inbox_messages=inbox_messages, outbox_messages=outbox_messages, view=view)
 
 
 @app.route("/message/<int:id>", methods=['GET', 'POST'])

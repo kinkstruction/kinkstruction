@@ -14,6 +14,10 @@ USER_ROLES = {
     "Admin": 1
 }
 
+# Pagination settings
+NUM_MESSAGES_PER_PAGE = 3
+NUM_FRIENDS_PER_PAGE = 3
+
 HTTP_500_POEMS = [
 """
 There once was a page on Kinkstruction,
