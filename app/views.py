@@ -57,6 +57,12 @@ def not_validated():
     return render_template("not_validated.html")
 
 
+@app.route("/friends", methods=['GET', 'POST'])
+@login_required
+def friends():
+    return render_template("friends.html")
+
+
 @app.route("/index", methods=['GET', 'POST'])
 @app.route('/', methods=['GET', 'POST'])
 def index():
