@@ -1,7 +1,7 @@
 from app import app, db, lm, bcrypt, verificationMailer, passwordMailer
 from flask import render_template, g, url_for, session, flash, redirect, request, Markup
 from flask.ext.login import login_user, logout_user, current_user, login_required, AnonymousUserMixin
-from app.models import User, Task, Message
+from app.models import User, Friend, FriendRequest, Message, Task
 from forms import *
 from markdown import markdown
 from config import HTTP_500_POEMS
@@ -57,17 +57,68 @@ def not_validated():
     return render_template("not_validated.html")
 
 
+@app.route("/index", methods=['GET', 'POST'])
+@app.route('/', methods=['GET', 'POST'])
+def index():
+
+    return render_template("index.html")
+
+
 @app.route("/friends", methods=['GET', 'POST'])
 @login_required
 def friends():
     return render_template("friends.html")
 
 
-@app.route("/index", methods=['GET', 'POST'])
-@app.route('/', methods=['GET', 'POST'])
-def index():
+@app.route("/friends/accept/<int:id>", methods=['GET', 'POST'])
+@login_required
+def accept_friend_request(id):
+    user = User.query.filter(User.id == id).first()
 
-    return render_template("index.html")
+    if user is None:
+        flash("Unable to find that user")
+        return redirect(url_for("friends"))
+
+    request = FriendRequest.query.filter_by(user_id=user.id).filter_by(friend_id=g.user.id).first()
+
+    if request is None:
+        flash("Unable to find a friend request to you from %s" % user.username)
+        return redirect(url_for("friends"))
+
+    db.session.delete(request)
+
+    f1 = Friend(user_id=g.user.id, friend_id=user.id)
+    f2 = Friend(user_id=user.id, friend_id=g.user.id)
+
+    db.session.add(f1)
+    db.session.add(f2)
+
+    db.session.commit()
+
+    flash("Friend request accepted!")
+    return redirect(url_for("friends"))
+
+
+@app.route("/friends/reject/<int:id>", methods=['GET', 'POST'])
+@login_required
+def reject_friend_request(id):
+    user = User.query.filter(User.id == id).first()
+
+    if user is None:
+        flash("Unable to find that user")
+        return redirect(url_for("friends"))
+
+    request = FriendRequest.query.filter_by(user_id=user.id).filter_by(friend_id=g.user.id).first()
+
+    if request is None:
+        flash("Unable to find a friend request to you from %s" % user.username)
+        return redirect(url_for("friends"))
+
+    db.session.delete(request)
+    db.session.commit()
+
+    flash("Friend request from %s rejected (don't worry, they won't know a thing)." % user.username)
+    return redirect(url_for("friends"))
 
 
 @app.route("/reset", methods=['GET', 'POST'])

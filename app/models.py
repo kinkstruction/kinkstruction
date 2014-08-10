@@ -114,13 +114,6 @@ class User(db.Model):
         db.CheckConstraint('age is null or (age >= 18 and age <= 100)')
     )
 
-    def get_users_sending_friend_requests(self):
-        # return db.session.query(User, FriendRequest).join(FriendRequest, User.id == FriendRequest.user_id).filter(FriendRequest.friend_id == self.id).all()
-        pass
-
-    def get_all_friends(self):
-        return db.session.query(User).join(Friend, User.id == Friend.friend_id).filter_by(user_id=self.id).all()
-
     def get_all_inbox_messages(self):
         return Message.query.filter_by(to_user_id=self.id).order_by(Message.sent_timestamp.desc()).all()
 
