@@ -28,24 +28,24 @@
                     <h3>You have no messages in your inbox!</h3>
                 {% endif %}
             </ul>
-            
+
             <div class="left">
                 {% if inbox_messages.has_prev%}
                     <a href="{{url_for('messages', inbox=inbox_messages.prev_num, outbox=outbox_messages.page, view='inbox')}}">
-                        <i class="fa fa-arrow-circle-o-left fa-2x"></i>Newer Inbox Messages
+                        <span class="badge"><i class="fa fa-arrow-left"></i> Newer Inbox Messages</span>
                     </a>
                 {% else %}
-                    <i class="fa fa-arrow-circle-o-left fa-2x"></i>Newer Inbox Messages
+                    <i class="fa fa-arrow-left"></i> Newer Inbox Messages
                 {% endif %}
             </div>
 
             <div class="right">
                 {% if inbox_messages.has_next %}
                     <a href="{{url_for('messages', inbox=inbox_messages.next_num, outbox=outbox_messages.page, view='inbox')}}">
-                        Older Inbox Messages<i class="fa fa-arrow-circle-o-right fa-2x"></i>
+                        <span class="badge">Older Inbox Messages <i class="fa fa-arrow-right"></i></span>
                     </a>
                 {% else %}
-                    Older Inbox Messages<i class="fa fa-arrow-circle-o-right fa-2x"></i>
+                    <span class="badge disabled">Older Inbox Messages <i class="fa fa-arrow-right"></i></span>
                 {% endif %}
             </div>
             <div class="clear"></div>
@@ -65,19 +65,19 @@
             <div class="left">
                 {% if outbox_messages.has_prev %}
                     <a href="{{url_for('messages', outbox=outbox_messages.prev_num, inbox=inbox_messages.page, view='outbox')}}">
-                        <i class="fa fa-arrow-circle-o-left fa-2x"></i>Newer Outbox Messages
+                        <span class="badge"><i class="fa fa-arrow-left"></i> Newer Outbox Messages</span>
                     </a>
                 {% else %}
-                    <i class="fa fa-arrow-circle-o-left fa-2x left"></i>Newer Outbox Messages
+                    <i class="fa fa-arrow-left left"></i>Newer Outbox Messages
                 {% endif %}
             </div>
             <div class="right">
                 {% if outbox_messages.has_next %}
                     <a class="right" href="{{url_for('messages', outbox=outbox_messages.next_num, inbox=inbox_messages.page, view='outbox')}}">
-                        Older Outbox Messages<i class="fa fa-arrow-circle-o-right fa-2x"></i>
+                        <span class="badge">Older Outbox Messages <i class="fa fa-arrow-right"></i></span>
                     </a>
                 {% else %}
-                    <span class="right">Older Outbox Messages<i class="fa fa-arrow-circle-o-right fa-2x"></i></span>
+                    <span class="right">Older Outbox Messages <i class="fa fa-arrow-right"></i></span>
                 {% endif %}
             </div>
             <div class="clear"></div>
