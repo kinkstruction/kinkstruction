@@ -3,6 +3,21 @@ from app import db
 from datetime import datetime, date
 
 
+friend_requests = db.Table('friend_requests',
+    db.Column('id', db.Integer, primary_key=True),
+    db.Column('user_id', db.Integer, db.ForeignKey('users.id')),
+    db.Column('friend_id', db.Integer, db.ForeignKey('users.id')),
+    db.Column('created', db.DateTime, default=datetime.utcnow)
+)
+
+friends = db.Table('friends',
+    db.Column('id', db.Integer, primary_key=True),
+    db.Column('user_id', db.Integer, db.ForeignKey('users.id')),
+    db.Column('friend_id', db.Integer, db.ForeignKey('users.id')),
+    db.Column('created', db.DateTime, default=datetime.utcnow)
+)
+
+
 class Message(db.Model):
     __tablename__ = "messages"
     id = db.Column(db.Integer, primary_key=True)
