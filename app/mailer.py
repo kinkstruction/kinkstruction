@@ -6,20 +6,66 @@ from jinja2 import Template
 from decorators import fire_and_forget
 
 
-class AbstractMailer(object):
+class Mailer(object):
     def __init__(self, app, mail):
         self.app = app
         self.mail = mail
         self.signer = Signer(ITSDANGEROUS_SECRET_KEY)
 
-    # def get_template(self, user):
-    #     raise Exception("The method get_template() in AbstractMailer must be overridden!")
+    @fire_and_forget
+    def send_mail(self, email, subject, body):
+        with self.app.app_context():
+            msg = Message(subject, sender='admin@kinkstruction.com', recipients=[email], html=body)
+            self.mail.send(msg)
 
-    # def send_mail(self, username, email):
-    #     raise Exception("The method send_mail() in AbstractMailer must be overridden!")
+
+class NewMessageMailer(Mailer):
+    def get_template(self):
+        return """
+<p>
+    Dear {{username}},
+</p>
+<p>
+    You've received a message from {{sending_username}}:
+</p>
+
+    {% if message_body|length > 140 %}
+    <blockquote>
+        {{message_body[:140]}}...
+    </blockquote>
+    {% else %}
+    <p>
+        {{message_body}}
+    </p>
+    {% endif %}
+<p>
+    <a href="{{url}}">Click here</a> to view the message within Kinkstruction.
+</p>
+<p>
+    Sincerely,
+</p>
+<p>
+    The Kinkstruction Admin
+</p>"""
+
+    @fire_and_forget
+    def send_mail(self, username, email, sending_username, message_id, message_body):
+        with self.app.app_context():
+
+            template = self.get_template()
+            msg = Message('New Message At Kinkstruction From {{sending_username}}',
+                       sender='admin@kinkstruction.com',
+                       recipients=[email])
+            msg.html = Template(template).render(username=username,
+                sending_username=sending_username,
+                message_id=message_id,
+                message_body=message_body,
+                url=url_for('message', id=message_id, _external=True))
+
+            self.mail.send(msg)
 
 
-class ResetPasswordMailer(AbstractMailer):
+class ResetPasswordMailer(Mailer):
 
     def get_template(self):
         return """
@@ -57,7 +103,7 @@ class ResetPasswordMailer(AbstractMailer):
         return url_for('reset_password_from_email_with_token', token=token, _external=True)
 
 
-class VerificationMailer(AbstractMailer):
+class VerificationMailer(Mailer):
 
     def get_template(self):
         return """

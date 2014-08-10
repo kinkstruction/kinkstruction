@@ -1,4 +1,4 @@
-from app import app, db, lm, bcrypt, verificationMailer, passwordMailer
+from app import app, db, lm, bcrypt, verificationMailer, passwordMailer, newMessageMailer, mailer
 from flask import render_template, g, url_for, session, flash, redirect, request, Markup
 from flask.ext.login import login_user, logout_user, current_user, login_required, AnonymousUserMixin
 from app.models import User, Friend, FriendRequest, Message, Task
@@ -408,7 +408,6 @@ def view_message(id):
 @login_required
 def new_message(id):
     form = NewMessageForm()
-
     if form.validate_on_submit():
         message = Message(
             from_user_id=g.user.id,
@@ -419,6 +418,12 @@ def new_message(id):
 
         db.session.add(message)
         db.session.commit()
+
+        user = User.query.filter_by(id=id).first()
+
+        email_body = render_template("mail/new_message.html", user=user, message=message)
+
+        mailer.send_mail(user.email, "New message from %s at Kinkstruction" % g.user.username, email_body)
 
         flash("Message sent!")
         return redirect(url_for('messages'))
@@ -451,6 +456,12 @@ def message_reply(id):
 
         db.session.add(message)
         db.session.commit()
+
+        user = original.from_user()
+
+        email_body = render_template("mail/new_message.html", user=user, message=message)
+
+        mailer.send_mail(user.email, "New message from %s at Kinkstruction" % g.user.username, email_body)
 
         flash("Message sent!")
         return redirect(url_for('messages'))
