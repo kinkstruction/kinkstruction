@@ -76,13 +76,13 @@ def accept_friend_request(id):
     user = User.query.filter(User.id == id).first()
 
     if user is None:
-        flash("Unable to find that user")
+        flash("Unable to find that user", "error")
         return redirect(url_for("friends"))
 
     request = FriendRequest.query.filter_by(user_id=user.id).filter_by(friend_id=g.user.id).first()
 
     if request is None:
-        flash("Unable to find a friend request to you from %s" % user.username)
+        flash("Unable to find a friend request to you from %s" % user.username, "error")
         return redirect(url_for("friends"))
 
     db.session.delete(request)
@@ -95,7 +95,7 @@ def accept_friend_request(id):
 
     db.session.commit()
 
-    flash("Friend request accepted!")
+    flash("Friend request accepted!", "success")
     return redirect(url_for("friends"))
 
 
@@ -105,19 +105,19 @@ def reject_friend_request(id):
     user = User.query.filter(User.id == id).first()
 
     if user is None:
-        flash("Unable to find that user")
+        flash("Unable to find that user", "error")
         return redirect(url_for("friends"))
 
     request = FriendRequest.query.filter_by(user_id=user.id).filter_by(friend_id=g.user.id).first()
 
     if request is None:
-        flash("Unable to find a friend request to you from %s" % user.username)
+        flash("Unable to find a friend request to you from %s" % user.username, "error")
         return redirect(url_for("friends"))
 
     db.session.delete(request)
     db.session.commit()
 
-    flash("Friend request from %s rejected (don't worry, they won't know a thing)." % user.username)
+    flash("Friend request from %s rejected (don't worry, they won't know a thing)." % user.username, "success")
     return redirect(url_for("friends"))
 
 
@@ -135,10 +135,10 @@ def reset_password():
             db.session.add(g.user)
             db.session.commit()
 
-            flash("Your password has been successfully changed!")
+            flash("Your password has been successfully changed!", "success")
             return redirect(url_for("profile_page", id=g.user.id))
         else:
-            flash("Your current password is incorrect. Please try again.")
+            flash("Your current password is incorrect. Please try again.", "success")
 
     return render_template("reset_password.html", form=form)
 
@@ -153,7 +153,7 @@ def reset_from_email_no_username():
         user = User.query.filter_by(username=username).first()
 
         if user is None:
-            flash("No user found with a username of '%s'" % username)
+            flash("No user found with a username of '%s'" % username, "error")
             return render_template("reset_from_email_no_username.html")
         else:
             return redirect(url_for('reset_password_from_email', username=username))
@@ -165,7 +165,7 @@ def reset_password_from_email(username):
     user = User.query.filter_by(username=username).first()
 
     if user is None:
-        flash("User '%s' not found" % username)
+        flash("User '%s' not found" % username, "error")
         return redirect(url_for("index"))
 
     token = str(uuid.uuid4())
@@ -178,7 +178,7 @@ def reset_password_from_email(username):
     passwordMailer.send_mail(user.username, user.email, token)
 
     pw_reset_flash_msg = r'Email sent! Check your email for instructions on how to change your password.'
-    flash(pw_reset_flash_msg)
+    flash(pw_reset_flash_msg, "success")
     return redirect(url_for('index'))
 
 
@@ -190,12 +190,12 @@ def reset_password_from_email_with_token():
     form = ResetPasswordFromEmailForm()
 
     if token is None:
-        flash("No token provided!")
+        flash("No token provided!", "error")
         return redirect(url_for("index"))
     else:
         user = User.query.filter_by(password_reset_token=token).first()
         if user is None:
-            flash("No user found with token '%s'" & token)
+            flash("No user found with token '%s'" & token, "error")
             return redirect(url_for("index"))
         else:
             delta = user.password_reset_token_expiration - datetime.utcnow()
@@ -206,12 +206,12 @@ def reset_password_from_email_with_token():
                     db.session.commit()
                     g.user = user
                     login_user(g.user)
-                    flash("Your password was successfully changed!")
+                    flash("Your password was successfully changed!", "success")
                     return redirect(url_for("index"))
                 else:
                     return render_template("reset_password_from_email.html", form=form)
             else:
-                flash("Token has expired!")
+                flash("Token has expired!", "warning")
                 return redirect(url_for("index"))
 
 
@@ -229,11 +229,11 @@ def login(user=None):
         g.user = User.query.filter_by(username=username).first()
 
         if g.user is None or not bcrypt.check_password_hash(g.user.pw_hash, password):
-            flash("Your username or password is incorrect.")
+            flash("Your username or password is incorrect.", "error")
             return redirect("/login")
 
         login_user(g.user, remember=remember_me)
-        flash("Authentication Successful!")
+        flash("Authentication Successful!", "success")
         return redirect("/")
 
     return render_template("login.html", title="Log In", form=form)
@@ -273,7 +273,7 @@ def edit_profile():
         db.session.add(g.user)
         db.session.commit()
 
-        flash("Your changes have been saved!")
+        flash("Your changes have been saved!", "success")
         return redirect(url_for('profile_page', id=g.user.id))
     else:
         # TODO: There has *got* to be a better way...
@@ -309,13 +309,13 @@ def sign_up():
         # currently used.
 
         if User.query.filter_by(username=username).count():
-            flash("Sorry, but the username '%s' is taken" % username)
+            flash("Sorry, but the username '%s' is taken" % username, "error")
             form.data.pop("username")
             return render_template("sign_up.html", form=form, title="Kinkstruction Registration")
 
         if User.query.filter_by(email=email).count():
             message = Markup('Sorry, but there seems to already be a user with an email address of \'%s\'. If this is you, then please <a href="/login">log in!</a>' % email)
-            flash(message)
+            flash(message, "error")
             form.data.pop("email")
             return render_template("sign_up.html", form=form, title="Kinkstruction Registration")
 
@@ -335,7 +335,7 @@ def sign_up():
 
         logout_user()
 
-        flash(Markup(verify_flash_msg))
+        flash(Markup(verify_flash_msg), "info")
         return redirect(url_for('index'))
 
     return render_template("sign_up.html", form=form, title="Kinkstruction Registration")
@@ -351,7 +351,7 @@ def resend_verification_email():
         u = g.user
 
         verificationMailer.send_mail(u.username, u.email)
-        flash(Markup("Verification email resent to <i>%s</i>. If you still can't find it, check your spam folder" % g.user.email))
+        flash(Markup("Verification email resent to <i>%s</i>. If you still can't find it, check your spam folder" % g.user.email), "success")
 
     return redirect(url_for("index"))
 
@@ -370,11 +370,11 @@ def verify_email():
         db.session.add(g.user)
         db.session.commit()
         login_user(g.user)
-        flash("Email validation successful!")
+        flash("Email validation successful!", "success")
     elif user is not None and user.is_authenticated():
-        flash("You've already validated. Log in!")
+        flash("You've already validated. Log in!", "info")
     else:
-        flash(Markup("Sorry, but email validation failed for some reason. <a href=\"/resend_verification_email\">Click here to resend the email</a>."))
+        flash(Markup("Sorry, but email validation failed for some reason. <a href=\"/resend_verification_email\">Click here to resend the email</a>."), "warning")
 
     return render_template("index.html")
 
@@ -393,7 +393,7 @@ def messages():
 def view_message(id):
     message = Message.query.filter_by(id=id).first()
     if message is None:
-        flash("Unable to display that message.")
+        flash("Unable to display that message.", "error")
         return redirect(url_for('index'))
 
     # Set the message to read, but only if it's sent to g.user
@@ -426,12 +426,12 @@ def new_message(id):
 
         mailer.send_mail(user.email, "New message from %s at Kinkstruction" % g.user.username, email_body)
 
-        flash("Message sent!")
+        flash("Message sent!", "success")
         return redirect(url_for('messages'))
     else:
         user = User.query.filter_by(id=id).first()
         if user is None:
-            flash("Unable to send a message to that user.")
+            flash("Unable to send a message to that user.", "error")
             return redirect(url_for('index'))
         else:
             return render_template('new_message.html', user=user, form=form)
@@ -442,7 +442,7 @@ def new_message(id):
 def message_reply(id):
     original = Message.query.filter_by(id=id).first()
     if original is None:
-        flash("Unable to reply to that message: no such message found!")
+        flash("Unable to reply to that message: no such message found!", "error")
         return redirect(url_for('index'))
 
     form = NewMessageForm()
@@ -464,7 +464,7 @@ def message_reply(id):
 
         mailer.send_mail(user.email, "New message from %s at Kinkstruction" % g.user.username, email_body)
 
-        flash("Message sent!")
+        flash("Message sent!", "success")
         return redirect(url_for('messages'))
     else:
         new_title = "Re:" + original.title
