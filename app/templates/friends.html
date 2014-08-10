@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block content %}
+    {% if g.user.users_sending_friend_requests.count() %}
+        <h3>New Friend Requests</h3>
+        <ul class="list-group">
+            {% for user in g.user.users_sending_friend_requests.all() %}
+                <li class="list-group-item">
+                    {{user.username}}  <a href="{{url_for('accept_friend_request', id=user.id)}}" type="button" class="btn btn-primary">Accept</a>
+                        <a href="{{url_for('reject_friend_request', id=user.id)}}" type="button" class="btn btn-primary">Reject</a>
+                </li>
+            {% endfor %}
+        </ul>
+
+    {% endif %}
+
+    {% if g.user.friends.count() %}
+        <ul class="list-group">
+            {% for user in g.user.friends %}
+                <li class="list-group-item">
+                    <a href="{{url_for('profile_page', id=user.id)}}">
+                        {{user.username}}
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <div class="well">
+            <h3>It appears as though you don't have any friends, yet...</h3>
+        </div>
+    {% endif %}
+{% endblock %}
