@@ -1,5 +1,13 @@
 <a class="list-group-item" href="{{url_for('view_message', id=message.id)}}">
-    <p>From: {{message.from_user().username}}</p>
-    <p>Sent: {{message.sent_timestamp}}</p>
-    <p>Title: {{message.title}}</p>
+    <div class="left">
+        <p>From: {{message.from_user().username}}</p>
+        <p>Sent: {{message.sent_timestamp}}</p>
+        <p>Title: {{message.title}}</p>
+    </div>
+    {% if not message.is_read %}
+    <div class="right">
+        <span class="text-danger">New!</span>
+    </div>
+    {% endif %}
+    <div class="clear"></div>
 </a>

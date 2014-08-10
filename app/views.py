@@ -396,7 +396,8 @@ def view_message(id):
         flash("Unable to display that message.")
         return redirect(url_for('index'))
 
-    if not message.is_read:
+    # Set the message to read, but only if it's sent to g.user
+    if not message.is_read and message.to_user().id == g.user.id:
         message.is_read = True
         db.session.add(message)
         db.session.commit()

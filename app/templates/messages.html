@@ -1,3 +1,4 @@
+{% from "_macros.html" import message_item %}
 {% extends "base.html" %}
 {% block content %}
     <ul class="nav nav-tabs">
@@ -13,7 +14,7 @@
             <ul class="list-group">
                 {% if inbox_messages %}
                     {% for message in inbox_messages %}
-                        {% include "message_list_item.html" %}
+                        {{ message_item(message) }}
                     {% endfor %}
                 {% else %}
                     <h3>You have no messages in your inbox!</h3>
@@ -24,7 +25,7 @@
             <ul class="list-group">
                 {% if outbox_messages %}
                     {% for message in outbox_messages %}
-                        {% include "message_list_item.html" %}
+                        {{ message_item(message, inbox=False) }}
                     {% endfor %}
                 {% else %}
                     <h3>You have no messages in your outbox!</h3>
