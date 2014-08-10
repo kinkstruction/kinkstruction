@@ -10,6 +10,11 @@
         <legend>Please log in:</legend>
 
         {{form_group_field(form.username, size=20, maxlength=256)}}
+        <div class="form-group">
+            <div class="col-md-10 col-md-offset-2">
+                (<a href="{{url_for('recover_username')}}">Forgot your username?</a>)
+            </div>
+        </div>
         {{form_group_field(form.password, size=20, maxlength=256)}}
         <div class="form-group">
             <div class="col-md-10 col-md-offset-2">

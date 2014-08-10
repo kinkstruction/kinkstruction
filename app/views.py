@@ -143,6 +143,29 @@ def reset_password():
     return render_template("reset_password.html", form=form)
 
 
+@app.route("/recover_username", methods=['GET', 'POST'])
+def recover_username():
+    if g.user.get_id():
+        flash("Why are you trying to recover your username, when you're logged in?!", "warning")
+        return redirect(url_for("index"))
+
+    email = request.values.get("email")
+
+    if email is None:
+        return render_template("recover_username.html")
+    else:
+        user = User.query.filter_by(email=email).first()
+
+        if user is None:
+            flash("No user found with an email address of %s" % email, "error")
+            return redirect(url_for("index"))
+
+        email_body = render_template("mail/recover_username.html", user=user)
+        mailer.send_mail(email, "Username Recovery", email_body)
+        flash("Username recovery email sent!", "success")
+        return redirect(url_for("index"))
+
+
 @app.route("/reset_from_email_no_username", methods=['GET', 'POST'])
 def reset_from_email_no_username():
     username = request.values.get("username")
