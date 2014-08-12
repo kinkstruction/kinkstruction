@@ -57,14 +57,23 @@ class Message(db.Model):
 
 
 class Task(db.Model):
-    __tablename__ = "task"
+    __tablename__ = "tasks"
     id = db.Column(db.Integer, primary_key=True)
     created = db.Column(db.DateTime, default=datetime.utcnow, index=True)
-    end_timestamp = db.Column(db.DateTime, default=datetime.utcnow, index=True)
+    completed = db.Column(db.DateTime, default=datetime.utcnow, index=True)
+    title = db.Column(db.String, nullable=False, index=True)
     description = db.Column(db.String, nullable=False, index=True)
     requester_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     doer_id = db.Column(db.Integer, db.ForeignKey("users.id"))
-    is_active = db.Column(db.Boolean, default=True)
+
+    tasks_todo = db.relationship('User',
+        primaryjoin="User.id == Task.doer_id",
+        backref=db.backref('tasks_todo', lazy='dynamic'))
+
+    tasks_assigned = db.relationship('User',
+        primaryjoin="User.id == Task.requester_id",
+        backref=db.backref('tasks_assigned', lazy='dynamic'))
+
     __table_args__ = (
         db.CheckConstraint("requester_id != doer_id"),
     )
@@ -108,11 +117,15 @@ class User(db.Model):
         secondaryjoin=(Friend.friend_id == id),
         lazy="dynamic"
     )
+
     __table_args__ = (
         db.UniqueConstraint('username'),
         db.UniqueConstraint('email'),
         db.CheckConstraint('age is null or (age >= 18 and age <= 100)')
     )
+
+    def tasks(self):
+        return self.tasks_todo.union_all(self.tasks_assigned)
 
     def inbox_messages(self):
         return Message.query.filter_by(to_user_id=self.id).order_by(Message.sent_timestamp.desc())
