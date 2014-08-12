@@ -4,7 +4,7 @@ from flask.ext.login import login_user, logout_user, current_user, login_require
 from app.models import User, Friend, FriendRequest, Message, Task
 from forms import *
 from markdown import markdown
-from config import HTTP_500_POEMS, NUM_MESSAGES_PER_PAGE, NUM_FRIENDS_PER_PAGE
+from config import HTTP_500_POEMS, NUM_MESSAGES_PER_PAGE, NUM_FRIENDS_PER_PAGE, NUM_TASKS_PER_PAGE
 from random import choice
 import re
 import uuid
@@ -59,9 +59,14 @@ def not_validated():
 
 @app.route("/index", methods=['GET', 'POST'])
 @app.route('/', methods=['GET', 'POST'])
-def index():
+@app.route("/index/<int:page>", methods=['GET', 'POST'])
+def index(page=1):
 
-    return render_template("index.html")
+    tasks = None
+
+    if g.user.is_authenticated():
+        tasks = g.user.tasks().filter(Task.completed == None).order_by(Task.created.desc()).paginate(page, NUM_TASKS_PER_PAGE, False)
+    return render_template("index.html", tasks=tasks)
 
 
 @app.route("/friends", methods=['GET', 'POST'])

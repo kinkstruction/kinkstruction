@@ -60,7 +60,7 @@ class Task(db.Model):
     __tablename__ = "tasks"
     id = db.Column(db.Integer, primary_key=True)
     created = db.Column(db.DateTime, default=datetime.utcnow, index=True)
-    completed = db.Column(db.DateTime, default=datetime.utcnow, index=True)
+    completed = db.Column(db.DateTime, index=True)
     title = db.Column(db.String, nullable=False, index=True)
     description = db.Column(db.String, nullable=False, index=True)
     requester_id = db.Column(db.Integer, db.ForeignKey("users.id"))
@@ -85,7 +85,7 @@ class Task(db.Model):
         return db.session.query(User, Task).filter(self.doer_id == User.id).first()
 
     def __repr__(self):
-        return "<Task: Requester: %d, doer: %d, '%r'>" % (self.requester_id, self.doer_id, self.description)
+        return "<Task: Requester: %d, doer: %d, '%r'>" % (self.requester_id, self.doer_id, self.title)
 
 
 class User(db.Model):

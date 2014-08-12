@@ -2,7 +2,7 @@
 {% block content %}
 
 {% if g.user.is_authenticated() %}
-    Show stuff here...
+    {% include "task_list.html" %}
 {% else %}
     <div class="col-md-6">
         <div class="jumbotron">
