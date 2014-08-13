@@ -104,6 +104,15 @@ class User(db.Model):
     is_validated = db.Column(db.Boolean, default=False)
     password_reset_token = db.Column(db.String)
     password_reset_token_expiration = db.Column(db.DateTime)
+
+    doer = db.relationship('Task',
+        primaryjoin="User.id == Task.doer_id",
+        backref=db.backref('doer'))
+
+    requester = db.relationship('Task',
+        primaryjoin="User.id == Task.requester_id",
+        backref=db.backref('requester'))
+
     users_sending_friend_requests = db.relationship('User',
         secondary="friend_requests",
         primaryjoin=(FriendRequest.friend_id == id),
@@ -138,18 +147,6 @@ class User(db.Model):
 
     def age_gender_role(self):
         return " ".join([str(x) if x is not None else "" for x in [self.age, self.gender, self.role]])
-
-    def tasks_todo(self, active=True):
-        return [x[1] for x in
-                db.session.query(User, Task).filter(User.id == Task.doer_id and Task.is_active == bool(active)).
-                    filter(User.id == self.id).all()
-                ]
-
-    def tasks_assigned(self, active=True):
-        return [x[1] for x in
-                    db.session.query(User, Task).filter(User.id == Task.requester_id and Task.is_active == bool(active)).
-                        filter(User.id == self.id).all()
-                ]
 
     def is_authenticated(self):
         return True

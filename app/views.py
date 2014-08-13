@@ -69,6 +69,18 @@ def index(page=1):
     return render_template("index.html", tasks=tasks)
 
 
+@app.route("/task/<int:id>", methods=['GET', 'POST'])
+@login_required
+def view_task(id):
+    task = Task.query.filter_by(id=id).first()
+
+    if task is None:
+        flash("No such task found!", "error")
+        return redirect(url_for("index"))
+
+    return render_template("view_task.html", task=task)
+
+
 @app.route("/friends", methods=['GET', 'POST'])
 @login_required
 def friends():

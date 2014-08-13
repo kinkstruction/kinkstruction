@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="jumbotron">
+        <div class="left">
+            <h2>{{task.title}}</h2>
+        </div>
+        <div class="right">
+            <p>Created: {{task.created}}</p>
+            <p>
+                Assigned by: <a href="{{url_for('profile_page', id=task.requester_id)}}">{{task.requester.username}}</a>
+            </p>
+            <p>
+                Assigned to: <a href="{{url_for('profile_page', id=task.doer_id)}}">{{task.doer.username}}</a>
+            </p>
+        </div>
+        <div class="clear"></div>
+        <div class="well">
+{% filter markdown %}
+{{task.description}}
+{% endfilter %}
+        </div>
+    </div>
+{% endblock %}
