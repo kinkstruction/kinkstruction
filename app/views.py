@@ -69,6 +69,27 @@ def index(page=1):
     return render_template("index.html", tasks=tasks)
 
 
+@app.route("/friends/send_request/<int:id>", methods=['GET', 'POST'])
+@login_required
+def send_friend_request(id):
+    user = User.query.filter(User.id == id).first()
+
+    if user is None:
+        flash("Unable to find that user", "error")
+        return redirect(url_for('index'))
+
+    if g.user.is_friend(id):
+        flash("You're already friends with %s!" % user.username, "warning")
+        return redirect(url_for('profile_page', id=id))
+
+    fr = FriendRequest(user_id=g.user.id, friend_id=id)
+    db.session.add(fr)
+    db.session.commit()
+
+    flash("Friend request sent!", "success")
+    return redirect(url_for('profile_page', id=id))
+
+
 @app.route("/friends", methods=['GET', 'POST'])
 @login_required
 def friends():
@@ -129,6 +150,30 @@ def reject_friend_request(id):
 
     flash("Friend request from %s rejected (don't worry, they won't know a thing)." % user.username, "success")
     return redirect(url_for("friends"))
+
+
+@app.route("/unfriend/<int:id>", methods=['GET', 'POST'])
+@login_required
+def unfriend(id):
+    friend = User.query.filter_by(id=id).first()
+
+    if friend is None:
+        flash("No such user found!", "error")
+        return redirect(url_for("index"))
+
+    if not g.user.is_friend(friend.id):
+        flash("That user is not your friend, so you can't unfriend them!", "error")
+        return redirect(url_for('profile_page', id=friend.id))
+
+    f1 = Friend.query.filter_by(user_id=friend.id).first()
+    f2 = Friend.query.filter_by(friend_id=friend.id).first()
+
+    db.session.delete(f1)
+    db.session.delete(f2)
+    db.session.commit()
+
+    flash("%s is no longer your friend." % friend.username, "success")
+    return redirect(url_for('profile_page', id=id))
 
 
 @app.route("/reset", methods=['GET', 'POST'])
