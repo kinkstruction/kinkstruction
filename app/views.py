@@ -9,6 +9,7 @@ from random import choice
 import re
 import uuid
 from datetime import datetime, date, timedelta
+import sqlalchemy
 
 verify_flash_msg = r'You need to verify your email address to continue. Please look for an email from <i>verifications@kinkstruction.com</i>. <a href="/resend_verification_email">Click here to resend the email</a>.'
 
@@ -64,10 +65,22 @@ def not_validated():
 def index(page=1):
 
     tasks = None
+    requested = request.values.get("requested")
+    completed = request.values.get("completed")
 
     if g.user.is_authenticated():
-        tasks = g.user.tasks().filter(Task.completed == None).order_by(Task.created.desc()).paginate(page, NUM_TASKS_PER_PAGE, False)
-    return render_template("index.html", tasks=tasks)
+        if requested:
+            if completed:
+                tasks = g.user.tasks_assigned.order_by(Task.status).paginate(page, NUM_TASKS_PER_PAGE, False)
+            else:
+                tasks = g.user.tasks_assigned.filter(Task.status < 3).order_by(Task.status).paginate(page, NUM_TASKS_PER_PAGE, False)
+        else:
+            if completed:
+                tasks = g.user.tasks_todo.order_by(Task.status).paginate(page, NUM_TASKS_PER_PAGE, False)
+            else:
+                tasks = g.user.tasks_todo.filter(Task.status < 3).order_by(Task.status.desc()).paginate(page, NUM_TASKS_PER_PAGE, False)
+
+    return render_template("index.html", tasks=tasks, requested=requested, page=page, completed=completed)
 
 
 @app.route("/task/<int:id>", methods=['GET', 'POST'])
