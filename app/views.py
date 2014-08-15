@@ -4,7 +4,7 @@ from flask.ext.login import login_user, logout_user, current_user, login_require
 from app.models import User, Friend, FriendRequest, Message, Task
 from forms import *
 from markdown import markdown
-from config import HTTP_500_POEMS, NUM_MESSAGES_PER_PAGE, NUM_FRIENDS_PER_PAGE, NUM_TASKS_PER_PAGE
+from config import HTTP_500_POEMS, NUM_MESSAGES_PER_PAGE, NUM_FRIENDS_PER_PAGE, NUM_TASKS_PER_PAGE, TASK_STATUSES
 from random import choice
 import re
 import uuid
@@ -21,6 +21,7 @@ def loadUser(id):
 @app.before_request
 def before_request():
     g.user = current_user
+    g.TASK_STATUSES = TASK_STATUSES
 
     # If we're sent to the root URL with age_verification=1, then set the cookie
     if request.args.get("age_verification"):
@@ -79,6 +80,62 @@ def view_task(id):
         return redirect(url_for("index"))
 
     return render_template("view_task.html", task=task)
+
+
+@app.route("/task/<int:id>/set_status/<int:status>", methods=['GET', 'POST'])
+@login_required
+def task_set_status(id, status):
+    if status not in TASK_STATUSES:
+        flash("No such status exists!", "error")
+        return redirect(url_for("index"))
+
+    task = Task.query.filter_by(id=id).first()
+
+    if task is None:
+        flash("No such task was found!", "error")
+        return redirect(url_for("index"))
+
+    if g.user.id == task.doer_id:
+        errorMsg = None
+
+        if status > 2:
+            errorMsg = "You cannot set that status for tasks assigned to you!"
+        elif status == 0 and task.status > 0:
+            errorMsg = "You can't unstart a task that has been started or completed!"
+        elif status == 0:
+            errorMsg = Markup("Why are you trying to set the status of this task <em>to its current status</em>?!")
+
+        if errorMsg:
+            flash(errorMsg, "error")
+
+        task.status = status
+        db.session.add(task)
+        db.session.commit()
+        flash("Status updated!", "success")
+        return redirect(url_for("view_task", id=id))
+    elif g.user.id == task.requester_id:
+        errorMsg = None
+
+        if status == 0:
+            errorMsg = "You can't unstart tasks!"
+        elif status <= 2:
+            errorMsg = "You can't start or complete a task that you've assigned to someone else!"
+
+        if errorMsg:
+            flash(errorMsg, "error")
+
+        task.status = status
+        db.session.add(task)
+        db.session.commit()
+
+        if status == 3:
+            flash("Task accepted as complete!", "success")
+        elif status == 4:
+            flash("Task rejected! How about a punishment task for %s?" % task.doer().username, "success")
+        else:
+            flash("Status updated!", "success")
+
+        return redirect(url_for("view_task", id=id))
 
 
 @app.route("/friends", methods=['GET', 'POST'])

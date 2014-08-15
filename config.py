@@ -14,6 +14,14 @@ USER_ROLES = {
     "Admin": 1
 }
 
+TASK_STATUSES = {
+    0: "Not Started",
+    1: "Started",
+    2: "Completed, not yet accepted",
+    3: "Accepted",
+    4: "Rejected"
+}
+
 # Pagination settings
 NUM_MESSAGES_PER_PAGE = 3
 NUM_FRIENDS_PER_PAGE = 3

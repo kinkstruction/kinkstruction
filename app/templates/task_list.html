@@ -5,12 +5,30 @@
                 <li class="list-group-item">
                     <div class="well">
                         <h3>{{task.title}}</h3>
-                        <p>
-                            Created: {{task.created}}
-                        </p>
-                        <p>
-                            {{task.description}}
-                        </p>
+                        <div class="left">
+                            <p>
+                                Created: {{task.created}}
+                            </p>
+                        </div>
+                        <div class="right">
+                            <p>
+                                Status: {{g.TASK_STATUSES[task.status]}}
+                            </p>
+
+                        </div>
+                        <div class="clear"></div>
+                        <div class="well">
+
+                            {% if task.description|length > 137: %}
+{% filter markdown %}
+{{task.description[0:137]}}...
+{% endfilter %}
+                            {% else %}
+{% filter markdown %}
+{{task.description}}
+{% endfilter %}
+                            {% endif %}
+                        </div>
                     </div>
                 </li>
             {% endfor %}

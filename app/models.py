@@ -1,6 +1,7 @@
 import app
 from app import db
 from datetime import datetime, date
+from config import TASK_STATUSES
 
 
 class FriendRequest(db.Model):
@@ -65,6 +66,7 @@ class Task(db.Model):
     description = db.Column(db.String, nullable=False, index=True)
     requester_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     doer_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+    status = db.Column(db.Integer, default=0)
 
     tasks_todo = db.relationship('User',
         primaryjoin="User.id == Task.doer_id",
@@ -76,6 +78,7 @@ class Task(db.Model):
 
     __table_args__ = (
         db.CheckConstraint("requester_id != doer_id"),
+        db.CheckConstraint("status in (" + ",".join([str(x) for x in TASK_STATUSES.keys()]) + ")")
     )
 
     def requester(self):
