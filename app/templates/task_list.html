@@ -2,35 +2,33 @@
     <div class="col-md-8">
         <ul class="list-group">
             {% for task in tasks.items %}
-                <li class="list-group-item">
+                <a class="list-group-item" href="{{url_for('view_task', id=task.id)}}">
+                    <h3>{{task.title}}</h3>
+                    <div class="left">
+                        <p>
+                            Created: {{task.created}}
+                        </p>
+                    </div>
+                    <div class="right">
+                        <p>
+                            Status: {{g.TASK_STATUSES[task.status]}}
+                        </p>
+
+                    </div>
+                    <div class="clear"></div>
                     <div class="well">
-                        <h3>{{task.title}}</h3>
-                        <div class="left">
-                            <p>
-                                Created: {{task.created}}
-                            </p>
-                        </div>
-                        <div class="right">
-                            <p>
-                                Status: {{g.TASK_STATUSES[task.status]}}
-                            </p>
 
-                        </div>
-                        <div class="clear"></div>
-                        <div class="well">
-
-                            {% if task.description|length > 137: %}
+                        {% if task.description|length > 137: %}
 {% filter markdown %}
 {{task.description[0:137]}}...
 {% endfilter %}
-                            {% else %}
+                        {% else %}
 {% filter markdown %}
 {{task.description}}
 {% endfilter %}
-                            {% endif %}
-                        </div>
+                        {% endif %}
                     </div>
-                </li>
+                </a>
             {% endfor %}
         </ul>
 
