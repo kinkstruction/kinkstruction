@@ -137,6 +137,9 @@ class User(db.Model):
         db.CheckConstraint('age is null or (age >= 18 and age <= 100)')
     )
 
+    def is_friends_with(self, other):
+        return other.id in [x.id for x in self.friends.all()]
+
     def tasks(self):
         return self.tasks_todo.union_all(self.tasks_assigned)
 

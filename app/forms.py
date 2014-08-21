@@ -3,8 +3,16 @@ from wtforms import StringField, PasswordField, BooleanField, IntegerField, Text
 from wtforms.validators import *
 from app.models import User, Task
 
+# TODO: Refactor the living bejeezus out of this...
 
-class UpdateTaskForm(Form):
+
+class CreateOrUpdateTaskForm(Form):
+    title = StringField('Title: ',
+        validators=[
+            Required(),
+            Length(max=256, message="Titles must have a length of at most 256 characters")
+        ]
+    )
     description = TextAreaField('Description: ', validators=[Required()])
 
 

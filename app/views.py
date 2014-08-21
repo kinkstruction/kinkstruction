@@ -95,6 +95,34 @@ def view_task(id):
     return render_template("view_task.html", task=task)
 
 
+@app.route("/task/new/<int:id>", methods=['GET', 'POST'])
+@login_required
+def create_task(id):
+
+    user = User.query.filter_by(id=id).first()
+    if user is None:
+        flash("No such user!", "error")
+        return redirect(url_for("index"))
+    elif not g.user.is_friends_with(user):
+        flash("You can only create tasks for friends!", "error")
+        return redirect(url_for("profile_page", id=id))
+
+    form = CreateOrUpdateTaskForm()
+
+    if form.validate_on_submit():
+        title = form.title.data
+        description = form.description.data
+
+        task = Task(title=title, description=description, requester_id=g.user.id, doer_id=id, status=0)
+        db.session.add(task)
+        db.session.commit()
+
+        flash("Task created!", "success")
+        return redirect(url_for("view_task", id=task.id))
+
+    return render_template("create_task.html", form=form)
+
+
 @app.route("/task/<int:id>/set_status/<int:status>", methods=['GET', 'POST'])
 @login_required
 def task_set_status(id, status):
@@ -164,17 +192,21 @@ def update_task(id):
         flash("You can't edit the description for this task because you didn't assign it.", "error")
         return redirect(url_for("view_task", id=id))
 
-    form = UpdateTaskForm()
+    form = CreateOrUpdateTaskForm()
 
     if form.validate_on_submit():
+        title = form.title.data
         description = form.description.data
+
         task.description = description
+        task.title = title
         db.session.add(task)
         db.session.commit()
 
         flash("Description updated!", "success")
         return redirect(url_for("view_task", id=id))
     else:
+        form.title.data = task.title
         form.description.data = task.description
         return render_template("view_task.html", edit=True, form=form, task=task)
 

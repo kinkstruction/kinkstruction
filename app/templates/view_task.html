@@ -51,9 +51,10 @@
         {% if edit and task.requester_id == g.user.id %}
             <form action="{{url_for('update_task', id=task.id)}}" method="post">
                 {{form.hidden_tag()}}
+                {{form_group_field(form.title, size=20, maxlength=256)}}
                 {{form_group_field(form.description, cols=48, rows=12)}}
                 <p>
-                    <button type="submit" class="btn btn-primary">Update Description</button>
+                    <button type="submit" class="btn btn-primary">Update Task</button>
                 </p>
             </form>
         {% else %}

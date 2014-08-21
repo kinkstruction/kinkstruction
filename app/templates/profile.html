@@ -18,11 +18,20 @@
         </div>
         <div class="right">
             {% if g.user.id != user.id %}
-                <form action="{{url_for('new_message', id=user.id)}}" method="post">
-                    <button type="submit" class="btn btn-primary">
-                        Send A Message!
-                    </button>
-                </form>
+                <p>
+                    <form action="{{url_for('new_message', id=user.id)}}" method="post">
+                        <button type="submit" class="btn btn-primary">
+                            Send A Message!
+                        </button>
+                    </form>
+                </p>
+                {% if g.user.is_friends_with(user) %}
+                <p>
+                    <form action="{{url_for('create_task', id=user.id)}}" method="post">
+                        <button type="submit" class="btn btn-primary">Create A Task For {{user.username}}!</button>
+                    </form>
+                <p>
+                {% endif %}
             {% endif %}
         </div>
         <div class="clear"></div>
