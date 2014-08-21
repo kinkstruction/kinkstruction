@@ -5,6 +5,10 @@ from app.models import User, Task
 
 
 class UpdateTaskForm(Form):
+    description = TextAreaField('Description: ', validators=[Required()])
+
+
+class UpdateTaskLogForm(Form):
     log = TextAreaField('Log: ', validators=[Optional()])
 
 

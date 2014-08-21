@@ -151,6 +151,34 @@ def task_set_status(id, status):
         return redirect(url_for("view_task", id=id))
 
 
+@app.route("/task/edit/<int:id>", methods=['GET', 'POST'])
+@login_required
+def update_task(id):
+
+    task = Task.query.filter_by(id=id).first()
+    if task is None:
+        flash("Task not found!", "error")
+        return redirect(url_for("index"))
+
+    if g.user.id != task.requester_id:
+        flash("You can't edit the description for this task because you didn't assign it.", "error")
+        return redirect(url_for("view_task", id=id))
+
+    form = UpdateTaskForm()
+
+    if form.validate_on_submit():
+        description = form.description.data
+        task.description = description
+        db.session.add(task)
+        db.session.commit()
+
+        flash("Description updated!", "success")
+        return redirect(url_for("view_task", id=id))
+    else:
+        form.description.data = task.description
+        return render_template("view_task.html", edit=True, form=form, task=task)
+
+
 @app.route("/task/edit/bio/<int:id>", methods=['GET', 'POST'])
 @login_required
 def update_task_log(id):
@@ -164,7 +192,7 @@ def update_task_log(id):
         flash("You can't edit the log for this task because it is not assigned to you.", "error")
         return redirect(url_for("view_task", id=id))
 
-    form = UpdateTaskForm()
+    form = UpdateTaskLogForm()
 
     if form.validate_on_submit():
         log = form.log.data

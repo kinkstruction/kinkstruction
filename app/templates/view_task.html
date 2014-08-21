@@ -46,11 +46,25 @@
             {% endif %}
         </div>
         <div class="clear"></div>
+
+
+        {% if edit and task.requester_id == g.user.id %}
+            <form action="{{url_for('update_task', id=task.id)}}" method="post">
+                {{form.hidden_tag()}}
+                {{form_group_field(form.description, cols=48, rows=12)}}
+                <p>
+                    <button type="submit" class="btn btn-primary">Update Description</button>
+                </p>
+            </form>
+        {% else %}
         <div class="well">
 {% filter markdown %}
 {{task.description}}
 {% endfilter %}
         </div>
+        {% endif %}
+
+
         {% if edit and task.doer_id == g.user.id%}
             <div class="well">
                 <form action="{{url_for('update_task_log', id=task.id)}}" method="post">
@@ -61,17 +75,23 @@
                     </p>
                 </form>
             </div>
-        {% elif task.doer_id == g.user.id %}
-        {% if task.log %}
-            <div class="well">
+        {% elif task.log %}
+        <div class="well">
 {% filter markdown %}
 {{task.log}}
 {% endfilter %}
-            </div>
+        </div>
         {% endif %}
+
+        {% if not edit %}
         <p>
-            <a href="{{url_for('update_task_log', id=task.id)}}" class="btn btn-primary btn-lg">Edit Log</a>
+            {% if task.doer_id == g.user.id %}
+                <a href="{{url_for('update_task_log', id=task.id)}}" class="btn btn-primary btn-lg">Edit Log</a>
+            {% elif task.requester_id == g.user.id %}
+                <a href="{{url_for('update_task', id=task.id)}}" class="btn btn-primary btn-lg">Edit Task</a>
+            {% endif %}
         </p>
         {% endif %}
+
     </div>
 {% endblock %}
