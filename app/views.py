@@ -151,6 +151,33 @@ def task_set_status(id, status):
         return redirect(url_for("view_task", id=id))
 
 
+@app.route("/task/edit/bio/<int:id>", methods=['GET', 'POST'])
+@login_required
+def update_task_log(id):
+
+    task = Task.query.filter_by(id=id).first()
+    if task is None:
+        flash("Task not found!", "error")
+        return redirect(url_for("index"))
+
+    if g.user.id != task.doer_id:
+        flash("You can't edit the log for this task because it is not assigned to you.", "error")
+        return redirect(url_for("view_task", id=id))
+
+    form = UpdateTaskForm()
+
+    if form.validate_on_submit():
+        log = form.log.data
+        task.log = log
+        db.session.add(task)
+        db.session.commit()
+        flash("Log updated!", "success")
+        return redirect(url_for("view_task", id=id))
+    else:
+        form.log.data = task.log if task.log is not None else ""
+        return render_template("view_task.html", edit=True, form=form, task=task)
+
+
 @app.route("/friends", methods=['GET', 'POST'])
 @login_required
 def friends():

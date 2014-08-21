@@ -4,6 +4,10 @@ from wtforms.validators import *
 from app.models import User, Task
 
 
+class UpdateTaskForm(Form):
+    log = TextAreaField('Log: ', validators=[Optional()])
+
+
 class ResetPasswordForm(Form):
 
     password = PasswordField('Password: ',

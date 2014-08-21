@@ -1,3 +1,4 @@
+{% from "_macros.html" import form_group_field %}
 {% extends "base.html" %}
 {% block content %}
     <div class="col-md-10">
@@ -50,5 +51,27 @@
 {{task.description}}
 {% endfilter %}
         </div>
+        {% if edit and task.doer_id == g.user.id%}
+            <div class="well">
+                <form action="{{url_for('update_task_log', id=task.id)}}" method="post">
+                    {{form.hidden_tag()}}
+                    {{form_group_field(form.log, cols=48, rows=12)}}
+                    <p>
+                        <button type="submit" class="btn btn-primary">Update Log</button>
+                    </p>
+                </form>
+            </div>
+        {% elif task.doer_id == g.user.id %}
+        {% if task.log %}
+            <div class="well">
+{% filter markdown %}
+{{task.log}}
+{% endfilter %}
+            </div>
+        {% endif %}
+        <p>
+            <a href="{{url_for('update_task_log', id=task.id)}}" class="btn btn-primary btn-lg">Edit Log</a>
+        </p>
+        {% endif %}
     </div>
 {% endblock %}

@@ -67,6 +67,7 @@ class Task(db.Model):
     requester_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     doer_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     status = db.Column(db.Integer, default=0)
+    log = db.Column(db.String, index=True)
 
     tasks_todo = db.relationship('User',
         primaryjoin="User.id == Task.doer_id",
