@@ -1,0 +1,17 @@
+{% from "_macros.html" import form_group_field %}
+{% extends "base.html" %}
+{% block content %}
+    <form class="form-horizontal" action="" method="post">
+        {{form.hidden_tag()}}
+        <fieldset>
+            <legend>Create Your Task:</legend>
+
+            {{form_group_field(form.title, size=20, maxlength=256)}}
+            {{form_group_field(form.description, cols=48, rows=12)}}
+
+        </fieldset>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-primary">Create Task</button>
+        </div>
+    </form>
+{% endblock %}

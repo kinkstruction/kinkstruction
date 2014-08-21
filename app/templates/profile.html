@@ -21,11 +21,16 @@
                 {% if g.user.is_friend(user.id) %}
                     <p>
                         <form action="{{url_for('unfriend', id=user.id)}}" method="post">
-                            <button type="submit" class="btn btn-primary">
+                            <button type="submit" id="unfriend_button" class="btn btn-primary">
                                 Unfriend {{user.username}}
                             </button>
                         </form>
                     </p>
+                    <p>
+                        <form action="{{url_for('create_task', id=user.id)}}" method="post">
+                            <button type="submit" class="btn btn-primary">Create A Task For {{user.username}}!</button>
+                        </form>
+                    <p>
                 {% else %}
                     <p>
                         <form action="{{url_for('send_friend_request', id=user.id)}}" method="post">

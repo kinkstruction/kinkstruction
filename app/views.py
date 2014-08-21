@@ -4,11 +4,12 @@ from flask.ext.login import login_user, logout_user, current_user, login_require
 from app.models import User, Friend, FriendRequest, Message, Task
 from forms import *
 from markdown import markdown
-from config import HTTP_500_POEMS, NUM_MESSAGES_PER_PAGE, NUM_FRIENDS_PER_PAGE, NUM_TASKS_PER_PAGE
+from config import HTTP_500_POEMS, NUM_MESSAGES_PER_PAGE, NUM_FRIENDS_PER_PAGE, NUM_TASKS_PER_PAGE, TASK_STATUSES
 from random import choice
 import re
 import uuid
 from datetime import datetime, date, timedelta
+import sqlalchemy
 
 verify_flash_msg = r'You need to verify your email address to continue. Please look for an email from <i>verifications@kinkstruction.com</i>. <a href="/resend_verification_email">Click here to resend the email</a>.'
 
@@ -21,6 +22,7 @@ def loadUser(id):
 @app.before_request
 def before_request():
     g.user = current_user
+    g.TASK_STATUSES = TASK_STATUSES
 
     # If we're sent to the root URL with age_verification=1, then set the cookie
     if request.args.get("age_verification"):
@@ -63,10 +65,177 @@ def not_validated():
 def index(page=1):
 
     tasks = None
+    requested = request.values.get("requested")
+    completed = request.values.get("completed")
 
     if g.user.is_authenticated():
-        tasks = g.user.tasks().filter(Task.completed == None).order_by(Task.created.desc()).paginate(page, NUM_TASKS_PER_PAGE, False)
-    return render_template("index.html", tasks=tasks)
+        if requested:
+            if completed:
+                tasks = g.user.tasks_assigned.order_by(Task.status).paginate(page, NUM_TASKS_PER_PAGE, False)
+            else:
+                tasks = g.user.tasks_assigned.filter(Task.status < 3).order_by(Task.status).paginate(page, NUM_TASKS_PER_PAGE, False)
+        else:
+            if completed:
+                tasks = g.user.tasks_todo.order_by(Task.status).paginate(page, NUM_TASKS_PER_PAGE, False)
+            else:
+                tasks = g.user.tasks_todo.filter(Task.status < 3).order_by(Task.status.desc()).paginate(page, NUM_TASKS_PER_PAGE, False)
+
+    return render_template("index.html", tasks=tasks, requested=requested, page=page, completed=completed)
+
+
+@app.route("/task/<int:id>", methods=['GET', 'POST'])
+@login_required
+def view_task(id):
+    task = Task.query.filter_by(id=id).first()
+
+    if task is None:
+        flash("No such task found!", "error")
+        return redirect(url_for("index"))
+
+    return render_template("view_task.html", task=task)
+
+
+@app.route("/task/new/<int:id>", methods=['GET', 'POST'])
+@login_required
+def create_task(id):
+
+    user = User.query.filter_by(id=id).first()
+    if user is None:
+        flash("No such user!", "error")
+        return redirect(url_for("index"))
+    elif not g.user.is_friends_with(user):
+        flash("You can only create tasks for friends!", "error")
+        return redirect(url_for("profile_page", id=id))
+
+    form = CreateOrUpdateTaskForm()
+
+    if form.validate_on_submit():
+        title = form.title.data
+        description = form.description.data
+
+        task = Task(title=title, description=description, requester_id=g.user.id, doer_id=id, status=0)
+        db.session.add(task)
+        db.session.commit()
+
+        flash("Task created!", "success")
+        return redirect(url_for("view_task", id=task.id))
+
+    return render_template("create_task.html", form=form)
+
+
+@app.route("/task/<int:id>/set_status/<int:status>", methods=['GET', 'POST'])
+@login_required
+def task_set_status(id, status):
+    if status not in TASK_STATUSES:
+        flash("No such status exists!", "error")
+        return redirect(url_for("index"))
+
+    task = Task.query.filter_by(id=id).first()
+
+    if task is None:
+        flash("No such task was found!", "error")
+        return redirect(url_for("index"))
+
+    if g.user.id == task.doer_id:
+        errorMsg = None
+
+        if status > 2:
+            errorMsg = "You cannot set that status for tasks assigned to you!"
+        elif status == 0 and task.status > 0:
+            errorMsg = "You can't unstart a task that has been started or completed!"
+        elif status == 0:
+            errorMsg = Markup("Why are you trying to set the status of this task <em>to its current status</em>?!")
+
+        if errorMsg:
+            flash(errorMsg, "error")
+
+        task.status = status
+        db.session.add(task)
+        db.session.commit()
+        flash("Status updated!", "success")
+        return redirect(url_for("view_task", id=id))
+    elif g.user.id == task.requester_id:
+        errorMsg = None
+
+        if status == 0:
+            errorMsg = "You can't unstart tasks!"
+        elif status <= 2:
+            errorMsg = "You can't start or complete a task that you've assigned to someone else!"
+
+        if errorMsg:
+            flash(errorMsg, "error")
+
+        task.status = status
+        db.session.add(task)
+        db.session.commit()
+
+        if status == 3:
+            flash("Task accepted as complete!", "success")
+        elif status == 4:
+            flash("Task rejected! How about a punishment task for %s?" % task.doer().username, "success")
+        else:
+            flash("Status updated!", "success")
+
+        return redirect(url_for("view_task", id=id))
+
+
+@app.route("/task/edit/<int:id>", methods=['GET', 'POST'])
+@login_required
+def update_task(id):
+
+    task = Task.query.filter_by(id=id).first()
+    if task is None:
+        flash("Task not found!", "error")
+        return redirect(url_for("index"))
+
+    if g.user.id != task.requester_id:
+        flash("You can't edit the description for this task because you didn't assign it.", "error")
+        return redirect(url_for("view_task", id=id))
+
+    form = CreateOrUpdateTaskForm()
+
+    if form.validate_on_submit():
+        title = form.title.data
+        description = form.description.data
+
+        task.description = description
+        task.title = title
+        db.session.add(task)
+        db.session.commit()
+
+        flash("Description updated!", "success")
+        return redirect(url_for("view_task", id=id))
+    else:
+        form.title.data = task.title
+        form.description.data = task.description
+        return render_template("view_task.html", edit=True, form=form, task=task)
+
+
+@app.route("/task/edit/bio/<int:id>", methods=['GET', 'POST'])
+@login_required
+def update_task_log(id):
+
+    task = Task.query.filter_by(id=id).first()
+    if task is None:
+        flash("Task not found!", "error")
+        return redirect(url_for("index"))
+
+    if g.user.id != task.doer_id:
+        flash("You can't edit the log for this task because it is not assigned to you.", "error")
+        return redirect(url_for("view_task", id=id))
+
+    form = UpdateTaskLogForm()
+
+    if form.validate_on_submit():
+        log = form.log.data
+        task.log = log
+        db.session.add(task)
+        db.session.commit()
+        flash("Log updated!", "success")
+        return redirect(url_for("view_task", id=id))
+    else:
+        form.log.data = task.log if task.log is not None else ""
+        return render_template("view_task.html", edit=True, form=form, task=task)
 
 
 @app.route("/friends/send_request/<int:id>", methods=['GET', 'POST'])

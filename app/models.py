@@ -1,6 +1,7 @@
 import app
 from app import db
 from datetime import datetime, date
+from config import TASK_STATUSES
 
 
 class FriendRequest(db.Model):
@@ -65,6 +66,8 @@ class Task(db.Model):
     description = db.Column(db.String, nullable=False, index=True)
     requester_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     doer_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+    status = db.Column(db.Integer, default=0)
+    log = db.Column(db.String, index=True)
 
     tasks_todo = db.relationship('User',
         primaryjoin="User.id == Task.doer_id",
@@ -76,6 +79,7 @@ class Task(db.Model):
 
     __table_args__ = (
         db.CheckConstraint("requester_id != doer_id"),
+        db.CheckConstraint("status in (" + ",".join([str(x) for x in TASK_STATUSES.keys()]) + ")")
     )
 
     def requester(self):
@@ -104,6 +108,15 @@ class User(db.Model):
     is_validated = db.Column(db.Boolean, default=False)
     password_reset_token = db.Column(db.String)
     password_reset_token_expiration = db.Column(db.DateTime)
+
+    doer = db.relationship('Task',
+        primaryjoin="User.id == Task.doer_id",
+        backref=db.backref('doer'))
+
+    requester = db.relationship('Task',
+        primaryjoin="User.id == Task.requester_id",
+        backref=db.backref('requester'))
+
     users_sending_friend_requests = db.relationship('User',
         secondary="friend_requests",
         primaryjoin=(FriendRequest.friend_id == id),
@@ -127,6 +140,9 @@ class User(db.Model):
     def is_friend(self, friend_id):
         return friend_id in [x.id for x in self.friends]
 
+    def is_friends_with(self, other):
+        return other.id in [x.id for x in self.friends.all()]
+
     def tasks(self):
         return self.tasks_todo.union_all(self.tasks_assigned)
 
@@ -141,18 +157,6 @@ class User(db.Model):
 
     def age_gender_role(self):
         return " ".join([str(x) if x is not None else "" for x in [self.age, self.gender, self.role]])
-
-    def tasks_todo(self, active=True):
-        return [x[1] for x in
-                db.session.query(User, Task).filter(User.id == Task.doer_id and Task.is_active == bool(active)).
-                    filter(User.id == self.id).all()
-                ]
-
-    def tasks_assigned(self, active=True):
-        return [x[1] for x in
-                    db.session.query(User, Task).filter(User.id == Task.requester_id and Task.is_active == bool(active)).
-                        filter(User.id == self.id).all()
-                ]
 
     def is_authenticated(self):
         return True
