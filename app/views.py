@@ -203,7 +203,7 @@ def update_task(id):
         db.session.add(task)
         db.session.commit()
 
-        flash("Description updated!", "success")
+        flash("Task updated!", "success")
         return redirect(url_for("view_task", id=id))
     else:
         form.title.data = task.title
