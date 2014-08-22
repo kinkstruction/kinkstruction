@@ -99,6 +99,8 @@ def view_task(id):
 
     if page is None:
         page = 1
+    else:
+        page = int(page)
 
     posts = task.posts.filter_by(task_id=task.id).order_by(TaskPost.created).paginate(page, NUM_TASK_POSTS_PER_PAGE, False)
 

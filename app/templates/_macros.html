@@ -31,7 +31,7 @@
     </a>
 {% endmacro %}
 
-{% macro pagination(object, endpoint, **kwargs) %}
+{% macro pagination(object, endpoint) %}
 <span class="delete-me" style="display:none">{{kwargs}}</span>
 <div class="left">
     {% if object.has_prev %}
