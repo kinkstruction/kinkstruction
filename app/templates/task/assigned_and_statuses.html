@@ -1,0 +1,34 @@
+{% if g.user.id == task.doer_id %}
+    <p>
+        Assigned to you by <a href="{{url_for('profile_page', id=task.requester_id)}}">{{task.requester.username}}</a>
+    </p>
+    {% if task.status == 0 %}
+        <form action="{{url_for('task_set_status', id=task.id, status=1)}}" method="post">
+            <button type="submit" class="btn btn-success">
+                Start
+            </button>
+        </form>
+    {% elif task.status == 1 %}
+        <form action="{{url_for('task_set_status', id=task.id, status=2)}}" method="post">
+            <button type="submit", class="btn btn-info">
+                Complete
+            </button>
+        </form>
+    {% endif %}
+{% elif g.user.id == task.requester_id %}
+    <p>
+        Assigned to <a href="{{url_for('profile_page', id=task.doer_id)}}">{{task.doer.username}}</a> by you.
+    </p>
+    {% if task.status == 2 %}
+        <p>
+            <form action="{{url_for('task_set_status', id=task.id, status=3)}}" method="post">
+                <button type="submit" class="btn btn-success">Accept</button>
+            </form>
+        </p>
+        <p>
+            <form action="{{url_for('task_set_status', id=task.id, status=4)}}" method="post">
+                <button type="submit" class="btn btn-danger">Reject</button>
+            </form>
+        </p>
+    {% endif %}
+{% endif %}

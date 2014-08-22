@@ -57,6 +57,23 @@ class Message(db.Model):
         return "<Message: From: %d, to: %d, title: %r>" % (self.from_user_id, self.to_user_id, self.title)
 
 
+class TaskPost(db.Model):
+    __tablename__ = "task_posts"
+    id = db.Column(db.Integer, primary_key=True)
+    task_id = db.Column(db.Integer, db.ForeignKey("tasks.id"))
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+    created = db.Column(db.DateTime, default=datetime.utcnow, index=True)
+    post = db.Column(db.String(140), nullable=False, index=True)
+
+    task = db.relationship('Task',
+        primaryjoin="Task.id == TaskPost.task_id",
+        backref=db.backref("posts", lazy="dynamic"))
+
+    author = db.relationship('User',
+        primaryjoin="User.id == TaskPost.user_id",
+        backref=db.backref("task_posts", lazy="dynamic"))
+
+
 class Task(db.Model):
     __tablename__ = "tasks"
     id = db.Column(db.Integer, primary_key=True)

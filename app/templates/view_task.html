@@ -1,4 +1,4 @@
-{% from "_macros.html" import form_group_field %}
+{% from "_macros.html" import form_group_field, pagination %}
 {% extends "base.html" %}
 {% block content %}
     <div class="col-md-10">
@@ -10,53 +10,17 @@
             <p>
                 Status: {{g.TASK_STATUSES[task.status]}}
             </p>
-            {% if g.user.id == task.doer_id %}
-                <p>
-                    Assigned to you by <a href="{{url_for('profile_page', id=task.requester_id)}}">{{task.requester.username}}</a>
-                </p>
-                {% if task.status == 0 %}
-                    <form action="{{url_for('task_set_status', id=task.id, status=1)}}" method="post">
-                        <button type="submit" class="btn btn-success">
-                            Start
-                        </button>
-                    </form>
-                {% elif task.status == 1 %}
-                    <form action="{{url_for('task_set_status', id=task.id, status=2)}}" method="post">
-                        <button type="submit", class="btn btn-info">
-                            Complete
-                        </button>
-                    </form>
-                {% endif %}
-            {% elif g.user.id == task.requester_id %}
-                <p>
-                    Assigned to <a href="{{url_for('profile_page', id=task.doer_id)}}">{{task.doer.username}}</a> by you.
-                </p>
-                {% if task.status == 2 %}
-                    <p>
-                        <form action="{{url_for('task_set_status', id=task.id, status=3)}}" method="post">
-                            <button type="submit" class="btn btn-success">Accept</button>
-                        </form>
-                    </p>
-                    <p>
-                        <form action="{{url_for('task_set_status', id=task.id, status=4)}}" method="post">
-                            <button type="submit" class="btn btn-danger">Reject</button>
-                        </form>
-                    </p>
-                {% endif %}
-            {% endif %}
+            {#
+                Block that says "Assigned by", "Assigned to", and
+                buttons for updating status (if applicable)
+            #}
+            {% include "task/assigned_and_statuses.html" %}
         </div>
         <div class="clear"></div>
 
 
         {% if edit and task.requester_id == g.user.id %}
-            <form action="{{url_for('update_task', id=task.id)}}" method="post">
-                {{form.hidden_tag()}}
-                {{form_group_field(form.title, size=20, maxlength=256)}}
-                {{form_group_field(form.description, cols=48, rows=12)}}
-                <p>
-                    <button type="submit" class="btn btn-primary">Update Task</button>
-                </p>
-            </form>
+            {% include "task/edit_task_form.html" %}
         {% else %}
         <div class="well">
 {% filter markdown %}
@@ -65,34 +29,22 @@
         </div>
         {% endif %}
 
+        <div class="col-md-6">
+            {% for post in posts.items %}
+                {% include "task/post.html" %}
+            {% endfor %}
+            {{pagination(posts, "view_task", id=task.id)}}
 
-        {% if edit and task.doer_id == g.user.id%}
-            <div class="well">
-                <form action="{{url_for('update_task_log', id=task.id)}}" method="post">
-                    {{form.hidden_tag()}}
-                    {{form_group_field(form.log, cols=48, rows=12)}}
+            {% if not posts.has_next %}
+                <form action="{{url_for('add_post_to_task', id=id, user_id=g.user.id)}}" method="post">
+                    <textarea name="post" cols="50" rows="4" maxlength=140 placeholder="Post an update (140 characters or fewer)"></textarea>
                     <p>
-                        <button type="submit" class="btn btn-primary">Update Log</button>
+                        <button type="submit" class="btn btn-primary">Add Post</button>
                     </p>
                 </form>
-            </div>
-        {% elif task.log %}
-        <div class="well">
-{% filter markdown %}
-{{task.log}}
-{% endfilter %}
-        </div>
-        {% endif %}
-
-        {% if not edit %}
-        <p>
-            {% if task.doer_id == g.user.id %}
-                <a href="{{url_for('update_task_log', id=task.id)}}" class="btn btn-primary btn-lg">Edit Log</a>
-            {% elif task.requester_id == g.user.id %}
-                <a href="{{url_for('update_task', id=task.id)}}" class="btn btn-primary btn-lg">Edit Task</a>
             {% endif %}
-        </p>
-        {% endif %}
+        </div>
+
 
     </div>
 {% endblock %}

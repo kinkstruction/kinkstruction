@@ -1,10 +1,10 @@
 from app import app, db, lm, bcrypt, mailer
 from flask import render_template, g, url_for, session, flash, redirect, request, Markup
 from flask.ext.login import login_user, logout_user, current_user, login_required, AnonymousUserMixin
-from app.models import User, Friend, FriendRequest, Message, Task
+from app.models import User, Friend, FriendRequest, Message, Task, TaskPost
 from forms import *
 from markdown import markdown
-from config import HTTP_500_POEMS, NUM_MESSAGES_PER_PAGE, NUM_FRIENDS_PER_PAGE, NUM_TASKS_PER_PAGE, TASK_STATUSES, ITSDANGEROUS_SECRET_KEY
+from config import HTTP_500_POEMS, NUM_MESSAGES_PER_PAGE, NUM_FRIENDS_PER_PAGE, NUM_TASKS_PER_PAGE, TASK_STATUSES, NUM_TASK_POSTS_PER_PAGE, ITSDANGEROUS_SECRET_KEY
 from random import choice
 import re
 import uuid
@@ -95,7 +95,48 @@ def view_task(id):
         flash("No such task found!", "error")
         return redirect(url_for("index"))
 
-    return render_template("view_task.html", task=task)
+    page = request.values.get("page")
+
+    if page is None:
+        page = 1
+
+    posts = task.posts.filter_by(task_id=task.id).order_by(TaskPost.created).paginate(page, NUM_TASK_POSTS_PER_PAGE, False)
+
+    return render_template("view_task.html", task=task, posts=posts)
+
+
+@app.route("/task/<int:id>/add_post/<int:user_id>", methods=['GET', 'POST'])
+@login_required
+def add_post_to_task(id, user_id):
+    task = Task.query.filter_by(id=id).first()
+
+    if task is None:
+        flash("No such task found!", "error")
+        return redirect(url_for("index"))
+
+    user = User.query.filter_by(id=user_id).first()
+
+    if user is None:
+        flash("No such user!", "error")
+
+    # TODO: Allow tasks to be updated by anyone/friends/only doer and requester
+    elif user.id != task.doer_id and user.id != task.requester_id:
+        flash("You are not allowed to update that task!", "error")
+    else:
+        post = request.values.get("post")
+
+        if post is None or post == "":
+            flash("Hmmm, weird...I didn't get the update post for this task that you tried to send...", "warning")
+        elif len(post) > 140:
+            flash("For some bizarre reason, I received a post update longer than 140 characters. Truncating...", "warning")
+            post = post[:140]
+
+        task_post = TaskPost(task_id=id, user_id=user_id, post=post)
+        db.session.add(task_post)
+        db.session.commit()
+
+        flash("Post has been posted. Everything's nice and posty!", "success")
+    return redirect(url_for("view_task", id=id))
 
 
 @app.route("/task/new/<int:id>", methods=['GET', 'POST'])
@@ -211,33 +252,6 @@ def update_task(id):
     else:
         form.title.data = task.title
         form.description.data = task.description
-        return render_template("view_task.html", edit=True, form=form, task=task)
-
-
-@app.route("/task/edit/bio/<int:id>", methods=['GET', 'POST'])
-@login_required
-def update_task_log(id):
-
-    task = Task.query.filter_by(id=id).first()
-    if task is None:
-        flash("Task not found!", "error")
-        return redirect(url_for("index"))
-
-    if g.user.id != task.doer_id:
-        flash("You can't edit the log for this task because it is not assigned to you.", "error")
-        return redirect(url_for("view_task", id=id))
-
-    form = UpdateTaskLogForm()
-
-    if form.validate_on_submit():
-        log = form.log.data
-        task.log = log
-        db.session.add(task)
-        db.session.commit()
-        flash("Log updated!", "success")
-        return redirect(url_for("view_task", id=id))
-    else:
-        form.log.data = task.log if task.log is not None else ""
         return render_template("view_task.html", edit=True, form=form, task=task)
 
 
