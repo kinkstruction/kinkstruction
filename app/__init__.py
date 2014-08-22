@@ -34,4 +34,4 @@ else:
 # for key in sorted(app.config.keys()):
 #     print key + ": " + str(app.config.get(key))
 
-from app import views, models, verificationMailer, passwordMailer, mail
+from app import views, models, mailer

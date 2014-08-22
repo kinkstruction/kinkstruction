@@ -4,7 +4,7 @@ from flask.ext.login import login_user, logout_user, current_user, login_require
 from app.models import User, Friend, FriendRequest, Message, Task
 from forms import *
 from markdown import markdown
-from config import HTTP_500_POEMS, NUM_MESSAGES_PER_PAGE, NUM_FRIENDS_PER_PAGE, NUM_TASKS_PER_PAGE, TASK_STATUSES
+from config import HTTP_500_POEMS, NUM_MESSAGES_PER_PAGE, NUM_FRIENDS_PER_PAGE, NUM_TASKS_PER_PAGE, TASK_STATUSES, ITSDANGEROUS_SECRET_KEY
 from random import choice
 import re
 import uuid
@@ -607,8 +607,8 @@ def resend_verification_email():
     if not re.match("^/static/", request.path) and g.user.get_id():
         # I'm not completely certain, but I believe we need this assignment so that
         # g.user doesn't get clobbered in the thread within mailer.send_mail()
-        
-        url = url_for("verify_email", _external=True, signed_username=signer.sign(username))
+
+        url = url_for("verify_email", _external=True, signed_username=signer.sign(g.user.username))
         email_body = render_template("mail/verification.html", user=g.user, url=url)
         subject = "Kinkstruction Confirmation"
 
