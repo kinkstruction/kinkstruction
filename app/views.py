@@ -107,9 +107,9 @@ def view_task(id):
     return render_template("view_task.html", task=task, posts=posts)
 
 
-@app.route("/task/<int:id>/add_post/", methods=['GET', 'POST'])
+@app.route("/task/add_post/<int:id>", methods=['GET', 'POST'])
 @login_required
-def add_post_to_task(id, user_id):
+def add_post_to_task(id):
     task = Task.query.filter_by(id=id).first()
 
     if task is None:
@@ -128,7 +128,7 @@ def add_post_to_task(id, user_id):
             flash("For some bizarre reason, I received a post update longer than 140 characters. Truncating...", "warning")
             post = post[:140]
 
-        task_post = TaskPost(task_id=id, user_id=user_id, post=post)
+        task_post = TaskPost(task_id=id, user_id=g.user.id, post=post)
         db.session.add(task_post)
         db.session.commit()
 
@@ -141,7 +141,7 @@ def add_post_to_task(id, user_id):
             user = task.doer
 
         email_body = render_template("mail/task_post_created.html", user=user, task=task, post=task_post)
-        subject = "%s Updated '%s'" % (user.username, task.title)
+        subject = "%s Updated The Task '%s'" % (g.user.username, task.title)
 
         mailer.send_mail(user.email, subject, email_body)
 
