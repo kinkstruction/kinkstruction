@@ -1,0 +1,13 @@
+{% filter markdown %}
+Dear {{user.username}},
+
+{{task.author.nickname}} has updated the task <a href="{{url_for('view_task', id=task.id)}}">{{task.title}}</a> with the following:
+
+<blockquote>
+{{post.post}}
+</blockquote>
+
+Sincerely,
+
+The Kinkstruction Admin
+{% endfilter %}

@@ -37,7 +37,7 @@
 
             {% if not posts.has_next %}
                 <p>
-                    <form action="{{url_for('add_post_to_task', id=task.id, user_id=g.user.id)}}" method="post">
+                    <form action="{{url_for('add_post_to_task', id=task.id)}}" method="post">
                         <textarea name="post" cols="50" rows="4" maxlength=140 placeholder="Post an update (140 characters or fewer)"></textarea>
                         <p>
                             <button type="submit" class="btn btn-primary">Add Post</button>

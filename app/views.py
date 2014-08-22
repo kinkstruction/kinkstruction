@@ -107,7 +107,7 @@ def view_task(id):
     return render_template("view_task.html", task=task, posts=posts)
 
 
-@app.route("/task/<int:id>/add_post/<int:user_id>", methods=['GET', 'POST'])
+@app.route("/task/<int:id>/add_post/", methods=['GET', 'POST'])
 @login_required
 def add_post_to_task(id, user_id):
     task = Task.query.filter_by(id=id).first()
@@ -116,13 +116,8 @@ def add_post_to_task(id, user_id):
         flash("No such task found!", "error")
         return redirect(url_for("index"))
 
-    user = User.query.filter_by(id=user_id).first()
-
-    if user is None:
-        flash("No such user!", "error")
-
     # TODO: Allow tasks to be updated by anyone/friends/only doer and requester
-    elif user.id != task.doer_id and user.id != task.requester_id:
+    elif g.user.id != task.doer_id and g.user.id != task.requester_id:
         flash("You are not allowed to update that task!", "error")
     else:
         post = request.values.get("post")
@@ -138,6 +133,18 @@ def add_post_to_task(id, user_id):
         db.session.commit()
 
         flash("Post has been posted. Everything's nice and posty!", "success")
+
+        user = None
+        if g.user.id == task.doer_id:
+            user = task.requester
+        elif g.user.id == task.requester_id:
+            user = task.doer
+
+        email_body = render_template("mail/task_post_created.html", user=user, task=task, post=task_post)
+        subject = "%s Updated '%s'" % (user.username, task.title)
+
+        mailer.send_mail(user.email, subject, email_body)
+
     return redirect(url_for("view_task", id=id))
 
 
