@@ -1,25 +1,21 @@
-<p>
-    Dear {{user.username}},
-</p>
-<p>
-    You've received a message from {{g.user.username}}:
-</p>
+{% filter markdown %}
+Dear {{user.username}},
 
-    {% if message.body|length > 140 %}
-    <blockquote>
-        {{message.body[:140]}}...
-    </blockquote>
-    {% else %}
-    <p>
-        {{message.body}}
-    </p>
-    {% endif %}
-<p>
-    <a href="{{url_for('messages', id=message.id, _external=True)}}">Click here</a> to view the message within Kinkstruction.
-</p>
-<p>
-    Sincerely,
-</p>
-<p>
-    The Kinkstruction Admin
-</p>
+You've received a message from {{g.user.username}}:
+
+{% if message.body|length > 140 %}
+
+<blockquote>
+{{message.body[:140]}}...
+</blockquote>
+
+{% else %}
+
+{{message.body}}
+
+{% endif %}
+
+Sincerely,
+
+The Kinkstruction Admin
+{% endfilter %}

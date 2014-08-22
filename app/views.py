@@ -1,4 +1,4 @@
-from app import app, db, lm, bcrypt, verificationMailer, passwordMailer, newMessageMailer, mailer
+from app import app, db, lm, bcrypt, mailer
 from flask import render_template, g, url_for, session, flash, redirect, request, Markup
 from flask.ext.login import login_user, logout_user, current_user, login_required, AnonymousUserMixin
 from app.models import User, Friend, FriendRequest, Message, Task
@@ -10,6 +10,9 @@ import re
 import uuid
 from datetime import datetime, date, timedelta
 import sqlalchemy
+from itsdangerous import Signer
+
+signer = Signer(ITSDANGEROUS_SECRET_KEY)
 
 verify_flash_msg = r'You need to verify your email address to continue. Please look for an email from <i>verifications@kinkstruction.com</i>. <a href="/resend_verification_email">Click here to resend the email</a>.'
 
@@ -422,7 +425,12 @@ def reset_password_from_email(username):
     db.session.add(user)
     db.session.commit()
 
-    passwordMailer.send_mail(user.username, user.email, token)
+    url = url_for('reset_password_from_email_with_token', token=token, _external=True)
+
+    email_body = render_template("/mail/reset_password.html", user=user, url=url)
+    subject = "Reset Your Kinkstruction Password"
+
+    mailer.send_mail(user.email, subject, email_body)
 
     pw_reset_flash_msg = r'Email sent! Check your email for instructions on how to change your password.'
     flash(pw_reset_flash_msg, "success")
@@ -578,7 +586,11 @@ def sign_up():
         g.user = u
         current_user = g.user
 
-        verificationMailer.send_mail(u.username, u.email)
+        url = url_for("verify_email", _external=True, signed_username=signer.sign(username))
+        email_body = render_template("mail/verification.html", user=g.user, url=url)
+        subject = "Kinkstruction Confirmation"
+
+        mailer.send_mail(g.user.email, subject, email_body)
 
         logout_user()
 
@@ -594,10 +606,14 @@ def resend_verification_email():
     # Also, don't send email if we don't know who the hell we're sending it to
     if not re.match("^/static/", request.path) and g.user.get_id():
         # I'm not completely certain, but I believe we need this assignment so that
-        # g.user doesn't get clobbered in the thread within verificationMailer.send_mail()
-        u = g.user
+        # g.user doesn't get clobbered in the thread within mailer.send_mail()
+        
+        url = url_for("verify_email", _external=True, signed_username=signer.sign(username))
+        email_body = render_template("mail/verification.html", user=g.user, url=url)
+        subject = "Kinkstruction Confirmation"
 
-        verificationMailer.send_mail(u.username, u.email)
+        mailer.send_mail(g.user.email, subject, email_body)
+
         flash(Markup("Verification email resent to <i>%s</i>. If you still can't find it, check your spam folder" % g.user.email), "success")
 
     return redirect(url_for("index"))
@@ -607,7 +623,7 @@ def resend_verification_email():
 def verify_email():
     signed_username = request.values.get("signed_username")
 
-    username = verificationMailer.signer.unsign(signed_username)
+    username = signer.unsign(signed_username)
 
     user = User.query.filter_by(username=username).first()
 

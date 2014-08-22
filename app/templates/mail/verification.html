@@ -1,0 +1,13 @@
+{% filter markdown %}
+Dear {{user.username}},
+
+You've received this email because someone using the email address {{user.email}}--hopefully you--opened up an account at kinkstruction.com.
+
+Please click the link below to validate your email address and activate your account.
+
+{{url}}
+
+Sincerely,
+
+The Kinkstruction Admin
+{% endfilter %}
