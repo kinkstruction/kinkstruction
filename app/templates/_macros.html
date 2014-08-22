@@ -32,25 +32,33 @@
 {% endmacro %}
 
 {% macro pagination(object, endpoint) %}
-{% if object and object.items %}
+{% if object and object.items and object.pages > 1%}
     <span class="delete-me" style="display:none">{{kwargs}}</span>
     <div class="left">
         {% if object.has_prev %}
+            <a href="{{url_for(endpoint, page=1, **kwargs)}}">
+                <button class="btn btn-primary"><i class="fa fa-angle-double-left fa-2x"></i></button>
+            </a>
             <a href="{{url_for(endpoint, page=object.prev_num, **kwargs)}}">
-                <button class="btn btn-primary"><i class="fa fa-arrow-left fa-2x"></i></button>
+                <button class="btn btn-primary"><i class="fa fa-angle-left fa-2x"></i></button>
             </a>
         {% else %}
-            <button class="btn btn-primary disabled"><i class="fa fa-arrow-left fa-2x"></i></button>
+            <button class="btn btn-primary disabled"><i class="fa fa-angle-double-left fa-2x"></i></button>
+            <button class="btn btn-primary disabled"><i class="fa fa-angle-left fa-2x"></i></button>
         {% endif %}
     </div>
 
     <div class="right">
         {% if object.has_next %}
             <a href="{{url_for(endpoint, page=object.next_num, **kwargs)}}">
-                <button class="btn btn-primary"><i class="fa fa-arrow-right fa-2x"></i></button>
+                <button class="btn btn-primary"><i class="fa fa-angle-right fa-2x"></i></button>
+            </a>
+            <a href="{{url_for(endpoint, page=object.pages, **kwargs)}}">
+                <button class="btn btn-primary"><i class="fa fa-angle-double-right fa-2x"></i></button>
             </a>
         {% else %}
-            <button class="btn btn-primary disabled"><i class="fa fa-arrow-right fa-2x"></i></button>
+            <button class="btn btn-primary disabled"><i class="fa fa-angle-right fa-2x"></i></button>
+            <button class="btn btn-primary"><i class="fa fa-angle-double-right fa-2x"></i></button>
         {% endif %}
     </div>
     <div class="clear"></div>

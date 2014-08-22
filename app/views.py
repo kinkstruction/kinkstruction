@@ -11,6 +11,7 @@ import uuid
 from datetime import datetime, date, timedelta
 import sqlalchemy
 from itsdangerous import Signer
+from math import floor
 
 signer = Signer(ITSDANGEROUS_SECRET_KEY)
 
@@ -96,11 +97,16 @@ def view_task(id):
         return redirect(url_for("index"))
 
     page = request.values.get("page")
+    print "RAW VALUE OF PAGE: %s" % page
 
     if page is None:
         page = 1
+    elif page == "last":
+        page = int(floor(task.posts.filter_by(task_id=task.id).count() / NUM_TASK_POSTS_PER_PAGE)) + 1
     else:
         page = int(page)
+
+    print "INTEGER VALUE OF PAGE: %s" % page
 
     posts = task.posts.filter_by(task_id=task.id).order_by(TaskPost.created).paginate(page, NUM_TASK_POSTS_PER_PAGE, False)
 
@@ -145,7 +151,7 @@ def add_post_to_task(id):
 
         mailer.send_mail(user.email, subject, email_body)
 
-    return redirect(url_for("view_task", id=id))
+    return redirect(url_for("view_task", id=id, page="last"))
 
 
 @app.route("/task/new/<int:id>", methods=['GET', 'POST'])
