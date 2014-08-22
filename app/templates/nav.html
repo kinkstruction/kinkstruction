@@ -11,25 +11,10 @@
         <ul class="nav navbar-nav">
             {% if g.user.is_authenticated() %}
                 <li class="active"><a href="{{url_for('profile_page', id=g.user.id)}}">Your Profile</a></li>
+                {% include "nav/messages.html" %}
+                {% include "nav/friends.html" %}
                 <li class="active">
-                    <a href="{{url_for('messages')}}">
-                        <i class="fa fa-envelope-o fa-2x">
-                            {% if g.user.num_unread_messages() %}
-                                <span class="badge">{{g.user.num_unread_messages()}}</span>
-                            {% endif %}
-                        </i>
-                    </a>
-                </li>
-                <li class="active">
-                    {% if g.user.users_sending_friend_requests.count() %}
-                        <a href="{{url_for('friends')}}">
-                            <i class="fa fa-users fa-2x">
-                                <span class="badge">{{g.user.users_sending_friend_requests.count()}}</span>
-                            </i>
-                        </a>
-                    {% else %}
-                        <a href="{{url_for('friends')}}"><i class="fa fa-users fa-2x"></i></a>
-                    {% endif %}
+                    <a href="{{url_for('members')}}"><i class="fa fa-list fa-2x"></i> Members</a>
                 </li>
             {% endif %}
         </ul>

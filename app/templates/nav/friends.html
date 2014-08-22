@@ -1,0 +1,11 @@
+<li class="active">
+    {% if g.user.users_sending_friend_requests.count() %}
+        <a href="{{url_for('friends')}}">
+            <i class="fa fa-users fa-2x">
+                <span class="badge">{{g.user.users_sending_friend_requests.count()}}</span>
+            </i>
+        </a>
+    {% else %}
+        <a href="{{url_for('friends')}}"><i class="fa fa-users fa-2x"></i></a>
+    {% endif %}
+</li>

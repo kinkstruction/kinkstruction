@@ -5,13 +5,8 @@
         <div class="left">
             <h3>{{user.username}}</h3>
             <p>
-                {{user.age_gender_role()}}
+                {{user.age_gender_orientation_role()}}
             </p>
-            {% if user.orientation %}
-                <p>
-                    Orientation: {{user.orientation}}
-                </p>
-            {% endif %}
             <p>
                 Joined <span class="from-now">{{user.created}}</span>
             </p>

@@ -4,7 +4,7 @@ from flask.ext.login import login_user, logout_user, current_user, login_require
 from app.models import User, Friend, FriendRequest, Message, Task, TaskPost
 from forms import *
 from markdown import markdown
-from config import HTTP_500_POEMS, NUM_MESSAGES_PER_PAGE, NUM_FRIENDS_PER_PAGE, NUM_TASKS_PER_PAGE, TASK_STATUSES, NUM_TASK_POSTS_PER_PAGE, ITSDANGEROUS_SECRET_KEY
+from config import *
 from random import choice
 import re
 import uuid
@@ -87,6 +87,16 @@ def index(page=1):
     return render_template("index.html", tasks=tasks, requested=requested, page=page, completed=completed)
 
 
+@app.route("/members/<int:page>", methods=['GET', 'POST'])
+@app.route("/members", methods=['GET', 'POST'])
+@login_required
+def members(page=1):
+
+    users = User.query.order_by(User.username).paginate(page, NUM_MEMBERS_PER_PAGE, False)
+
+    return render_template("members.html", users=users)
+
+
 @app.route("/task/<int:id>", methods=['GET', 'POST'])
 @login_required
 def view_task(id):
@@ -97,7 +107,6 @@ def view_task(id):
         return redirect(url_for("index"))
 
     page = request.values.get("page")
-    print "RAW VALUE OF PAGE: %s" % page
 
     if page is None:
         page = 1
@@ -105,8 +114,6 @@ def view_task(id):
         page = int(floor(task.posts.filter_by(task_id=task.id).count() / NUM_TASK_POSTS_PER_PAGE)) + 1
     else:
         page = int(page)
-
-    print "INTEGER VALUE OF PAGE: %s" % page
 
     posts = task.posts.filter_by(task_id=task.id).order_by(TaskPost.created).paginate(page, NUM_TASK_POSTS_PER_PAGE, False)
 

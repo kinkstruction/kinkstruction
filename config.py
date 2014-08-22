@@ -28,6 +28,9 @@ NUM_FRIENDS_PER_PAGE = 3
 NUM_TASKS_PER_PAGE = 3
 NUM_TASK_POSTS_PER_PAGE = 3
 
+# Must be even, since we'll spread users across two columns
+NUM_MEMBERS_PER_PAGE = 4
+
 HTTP_500_POEMS = [
 """
 There once was a page on Kinkstruction,
