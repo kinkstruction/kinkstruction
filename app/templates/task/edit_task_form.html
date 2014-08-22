@@ -1,3 +1,4 @@
+{% from "_macros.html" import form_group_field %}
 <form action="{{url_for('update_task', id=task.id)}}" method="post">
     {{form.hidden_tag()}}
     {{form_group_field(form.title, size=20, maxlength=256)}}

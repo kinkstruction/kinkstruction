@@ -30,12 +30,14 @@
         {% endif %}
 
         <div class="col-md-6">
-            {% for post in posts.items %}
-                {% include "task/post.html" %}
-            {% endfor %}
-            {{pagination(posts, "view_task", id=task.id)}}
-
-            {% if not posts.has_next %}
+            {% if posts and posts.items %}
+                {% for post in posts.items %}
+                    {% include "task/post.html" %}
+                {% endfor %}
+                {{pagination(posts, "view_task", id=task.id)}}
+            {% endif %}
+            
+            {% if posts and not posts.has_next %}
                 <p>
                     <form action="{{url_for('add_post_to_task', id=task.id)}}" method="post">
                         <textarea name="post" cols="50" rows="4" maxlength=140 placeholder="Post an update (140 characters or fewer)"></textarea>
@@ -46,6 +48,10 @@
                 </p>
             {% endif %}
         </div>
+
+        {% if not edit and task.requester_id == g.user.id %}
+            <a class="btn btn-primary btn-lg" href="{{url_for('update_task', id=task.id)}}">Edit Post</a>
+        {% endif %}
 
 
     </div>

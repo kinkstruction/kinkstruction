@@ -173,6 +173,11 @@ def create_task(id):
         flash("Task created!", "success")
         return redirect(url_for("view_task", id=task.id))
 
+        email_body = render_template("mail/new_task.html", task=task)
+        subject = "%s Has Created A New Task For You!" % g.user.username
+
+        mailer.send_mail(task.doer.email, subject, email_body)
+
     return render_template("create_task.html", form=form)
 
 
@@ -206,7 +211,22 @@ def task_set_status(id, status):
         db.session.add(task)
         db.session.commit()
         flash("Status updated!", "success")
-        return redirect(url_for("view_task", id=id))
+
+        if not errorMsg:
+
+            subject = None
+            email_body = None
+
+            if task.status == 1:
+                subject = "%s Has Started Task '%s'" % (task.doer.username, task.title)
+                email_body = render_template("mail/task_started.html", task=task)
+            elif task.status == 2:
+                subject = "Awaiting Your Approval: %s Has Completed Task '%s'" % (task.doer.username, task.title)
+                email_body = render_template("mail/task_doer_completed.html", task=task)
+
+            if subject and email_body:
+                mailer.send_mail(task.requester.email, subject, email_body)
+
     elif g.user.id == task.requester_id:
         errorMsg = None
 
@@ -225,11 +245,25 @@ def task_set_status(id, status):
         if status == 3:
             flash("Task accepted as complete!", "success")
         elif status == 4:
-            flash("Task rejected! How about a punishment task for %s?" % task.doer().username, "success")
+            flash("Task rejected! How about a punishment task for %s?" % task.doer.username, "success")
         else:
             flash("Status updated!", "success")
 
-        return redirect(url_for("view_task", id=id))
+        if not errorMsg:
+            subject = None
+            email_body = None
+
+            if task.status == 3:
+                subject = "%s Has Accepted Task '%s'!" % (task.requester.username, task.title)
+                email_body = render_template("mail/task_accepted.html", task=task)
+            elif task.status == 4:
+                subject = "%s Has Rejected Task '%s'!" % (task.requester.username, task.title)
+                email_body = render_template("mail/task_rejected.html", task=task)
+
+            if subject and email_body:
+                mailer.send_mail(task.doer.email, subject, email_body)
+
+    return redirect(url_for("view_task", id=id))
 
 
 @app.route("/task/edit/<int:id>", methods=['GET', 'POST'])
@@ -257,7 +291,13 @@ def update_task(id):
         db.session.commit()
 
         flash("Task updated!", "success")
+
+        email_body = render_template("mail/task_edit.html", task=task)
+        subject = "%s Has Edited The Task '%s'" % (g.user.username, task.title)
+        mailer.send_mail(task.doer.email, subject, email_body)
+
         return redirect(url_for("view_task", id=id))
+
     else:
         form.title.data = task.title
         form.description.data = task.description

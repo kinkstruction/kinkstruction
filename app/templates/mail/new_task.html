@@ -1,0 +1,11 @@
+{% filter markdown %}
+
+Dear {{task.doer.username}},
+
+{{task.requester.username}} has created the following task for you: <a href="{{url_for('view_task', id=task.id, _external=True)}}">{{task.title}}</a>.
+
+Sincerely,
+
+The Kinkstruction Admin
+
+{% endfilter %}

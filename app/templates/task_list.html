@@ -32,22 +32,23 @@
 </div>
 <div class="col-md-8 col-md-offset-2">
     <ul class="list-group">
-        {% for task in tasks.items %}
-            <a class="list-group-item" href="{{url_for('view_task', id=task.id)}}">
-                <h3>{{task.title}}</h3>
-                <div class="left">
-                    <p>
-                        Created: {{task.created}}
-                    </p>
-                </div>
-                <div class="right">
-                    <p>
-                        Status: {{g.TASK_STATUSES[task.status]}}
-                    </p>
-                 </div>
-                <div class="clear"></div>
-                <div class="well">
-                     {% if task.description|length > 137: %}
+        {% if tasks and tasks.items %}
+            {% for task in tasks.items %}
+                <a class="list-group-item" href="{{url_for('view_task', id=task.id)}}">
+                    <h3>{{task.title}}</h3>
+                    <div class="left">
+                        <p>
+                            Created: {{task.created}}
+                        </p>
+                    </div>
+                    <div class="right">
+                        <p>
+                            Status: {{g.TASK_STATUSES[task.status]}}
+                        </p>
+                     </div>
+                    <div class="clear"></div>
+                    <div class="well">
+                         {% if task.description|length > 137: %}
 {% filter markdown %}
 {{task.description[0:137]}}...
 {% endfilter %}
@@ -55,10 +56,11 @@
 {% filter markdown %}
 {{task.description}}
 {% endfilter %}
-                    {% endif %}
-                </div>
-            </a>
-        {% endfor %}
+                        {% endif %}
+                    </div>
+                </a>
+            {% endfor %}
+        {% endif %}
     </ul>
 {% if tasks and tasks.items %}
     <div class="left">

@@ -1,0 +1,9 @@
+{% filter markdown %}
+Dear {{task.doer.username}},
+
+Good news! {{task.requester.username}} has accepted the task '<a href="{{url_for('view_task', id=task.id, _external=True)}}">{{task.title}}</a>'!
+
+Sincerely,
+
+The Kinkstruction Admin
+{% endfilter %}
