@@ -5,7 +5,7 @@
             {% for user in last_seen_members %}
                 <li class="list-group-item">
                     <a href="{{url_for('profile_page', id=user.id)}}">{{user.username}}</a>
-                    ({{user.last_seen}})
+                    (<span class="moment-js">{{user.last_seen}}</span>)
                 </li>
             {% endfor %}
         </ul>

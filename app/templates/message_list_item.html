@@ -1,7 +1,7 @@
 <a class="list-group-item" href="{{url_for('view_message', id=message.id)}}">
     <div class="left">
         <p>From: {{message.from_user().username}}</p>
-        <p>Sent: {{message.sent_timestamp}}</p>
+        <p>Sent: <span class="moment-js">{{message.sent_timestamp}}</span></p>
         <p>Title: {{message.title}}</p>
     </div>
     {% if not message.is_read %}

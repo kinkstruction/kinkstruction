@@ -6,7 +6,7 @@
         <strong>From: </strong> <a href="{{url_for('profile_page', id=message.from_user_id)}}">{{message.from_user().username}}</a>
     </p>
     <p>
-        <strong>Sent: </strong> {{message.sent_timestamp}}
+        <strong>Sent: </strong> <span class="moment-js">{{message.sent_timestamp}}</span>
     </p>
     <div class="well">
 {% filter markdown %}
