@@ -1,0 +1,13 @@
+{% if g.user.is_authenticated() and last_seen_members %}
+    <div class="col-md-2">
+        <h6>Last Seen Users:</h6>
+        <ul class="list-group">
+            {% for user in last_seen_members %}
+                <li class="list-group-item">
+                    <a href="{{url_for('profile_page', id=user.id)}}">{{user.username}}</a>
+                    ({{user.last_seen}})
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endif %}

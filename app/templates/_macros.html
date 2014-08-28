@@ -6,7 +6,7 @@
         Source: http://stackoverflow.com/a/13944920
     #}
     <span class="delete-me" style="display:none">{{kwargs}}</span>
-    <div class="col-md-10">
+    <div class="col-md-8">
         {{field(**kwargs)}}
         {% for error in field.errors %}
             <span class="text-danger">[{{error}}]</span><br>

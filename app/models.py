@@ -125,6 +125,7 @@ class User(db.Model):
     is_validated = db.Column(db.Boolean, default=False)
     password_reset_token = db.Column(db.String)
     password_reset_token_expiration = db.Column(db.DateTime)
+    last_seen = db.Column(db.DateTime, default=datetime.utcnow)
 
     doer = db.relationship('Task',
         primaryjoin="User.id == Task.doer_id",

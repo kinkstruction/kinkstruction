@@ -26,6 +26,8 @@ def loadUser(id):
 @app.before_request
 def before_request():
     g.user = current_user
+
+    # Populate task statuses (lookup dict)
     g.TASK_STATUSES = TASK_STATUSES
 
     # If we're sent to the root URL with age_verification=1, then set the cookie
@@ -72,6 +74,8 @@ def index(page=1):
     requested = request.values.get("requested")
     completed = request.values.get("completed")
 
+    last_seen_members = None
+
     if g.user.is_authenticated():
         if requested:
             if completed:
@@ -84,7 +88,9 @@ def index(page=1):
             else:
                 tasks = g.user.tasks_todo.filter(Task.status < 3).order_by(Task.status.desc()).paginate(page, NUM_TASKS_PER_PAGE, False)
 
-    return render_template("index.html", tasks=tasks, requested=requested, page=page, completed=completed)
+        last_seen_members = User.query.filter(User.last_seen != None).order_by(User.last_seen.desc()).limit(6)
+
+    return render_template("index.html", tasks=tasks, requested=requested, page=page, completed=completed, last_seen_members=last_seen_members)
 
 
 @app.route("/members/<int:page>", methods=['GET', 'POST'])
@@ -563,6 +569,9 @@ def login(user=None):
             flash("Your username or password is incorrect.", "error")
             return redirect("/login")
 
+        g.user.last_seen = datetime.utcnow()
+        db.session.add(g.user)
+        db.session.commit()
         login_user(g.user, remember=remember_me)
         flash("Authentication Successful!", "success")
         return redirect("/")

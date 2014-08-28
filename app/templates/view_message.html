@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="well col-md-11">
+<div class="well col-md-9">
     <h6>"{{message.title}}"</h6>
     <p>
         <strong>From: </strong> <a href="{{url_for('profile_page', id=message.from_user_id)}}">{{message.from_user().username}}</a>
