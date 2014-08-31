@@ -210,6 +210,8 @@ def add_post_to_task(id):
 @login_required
 def create_task(id):
 
+    print request.values.get("privacy")
+
     user = User.query.filter_by(id=id).first()
     if user is None:
         flash("No such user!", "error")
@@ -221,10 +223,14 @@ def create_task(id):
     form = CreateTaskForm()
 
     if form.validate_on_submit():
+        print "HOOHAH!"
+        print form.privacy.data
+
         title = form.title.data
         description = form.description.data
+        privacy = form.privacy.data
 
-        task = Task(title=title, description=description, requester_id=g.user.id, doer_id=id, status=0)
+        task = Task(title=title, description=description, requester_id=g.user.id, doer_id=id, status=0, privacy=privacy)
         db.session.add(task)
         db.session.commit()
 
@@ -247,7 +253,11 @@ def create_task(id):
 
         return redirect(url_for("view_task", id=task.id))
 
-    return render_template("task/new.html", form=form)
+    else:
+        print "Didn't validate...got privacy of %s" % form.privacy.data
+
+        form.privacy.data = 0
+        return render_template("task/new.html", form=form)
 
 
 @app.route("/task/start/<int:id>", methods=['GET', 'POST'])

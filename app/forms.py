@@ -1,5 +1,5 @@
 from flask.ext.wtf import Form
-from wtforms import StringField, PasswordField, BooleanField, IntegerField, TextAreaField
+from wtforms import StringField, PasswordField, BooleanField, IntegerField, TextAreaField, RadioField
 from wtforms.validators import *
 from app.models import User, Task
 
@@ -14,9 +14,26 @@ class UpdateTaskForm(Form):
         ]
     )
     description = TextAreaField('Description: ', validators=[Required()])
+    privacy = RadioField(choices=[
+        (0, "Public (can be seen by any member)"),
+        (1, "Friends (can be seen by friends of either you or the assignee)"),
+        (2, "Private (can be seen only by you and the assignee)")
+    ])
 
 
-class CreateTaskForm(UpdateTaskForm):
+class CreateTaskForm(Form):
+    title = StringField('Title: ',
+        validators=[
+            Required(),
+            Length(max=256, message="Titles must have a length of at most 256 characters")
+        ]
+    )
+    description = TextAreaField('Description: ', validators=[Required()])
+    privacy = RadioField("Privacy: ", choices=[
+        (0, "Public (can be seen by any member)"),
+        (1, "Friends (can be seen by friends of either you or the assignee)"),
+        (2, "Private (can be seen only by you and the assignee)")
+    ], default=0, validators=[Optional()])
     points = IntegerField('Points: ', default=0, validators=[NumberRange(min=0)])
 
 

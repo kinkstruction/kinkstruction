@@ -1,0 +1,25 @@
+{% with %}
+{% set fa_class = None %}
+{% set title = None %}
+
+{% if task.privacy == 0 %}
+    {% set fa_class = "fa-globe" %}
+    {% set title = "This task is viewable by all members" %}
+{% elif task.privacy == 1 %}
+    {% set fa_class = "fa-users" %}
+    {% set title = "This task is only viewable by friends" %}
+{% elif task.privacy == 2 %}
+    {% set fa_class = "fa-user" %}
+    {% set title = "This task is private (only viewable by those involved)" %}
+{% endif %}
+
+{% if fa_class and title %}
+<div class="right">
+    <p>
+        <i class="fa {{fa_class}} fa-2x" data-toggle="tooltip" data-placement="top" title="{{title}}"></i>
+    </p>
+</div>
+<div class="clear"></div>
+{% endif %}
+
+{% endwith %}

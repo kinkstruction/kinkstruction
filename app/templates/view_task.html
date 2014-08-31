@@ -6,6 +6,7 @@
             <h2>{{task.title}}</h2>
         </div>
         <div class="right">
+            {% include "task/privacy_display.html" %}
             <p>Created: <span class="moment-js">{{task.created}}</span></p>
             {% include "task/points_display.html" %}
             <p>

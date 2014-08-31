@@ -7,13 +7,14 @@
         {% if tasks and tasks.items %}
             {% for task in tasks.items %}
                 <a class="list-group-item" href="{{url_for('view_task', id=task.id)}}">
-                    <h3>{{task.title}}</h3>
                     <div class="left">
+                        <h3>{{task.title}}</h3>
                         <p>
                             Created: <span class="moment-js">{{task.created}}</span>
                         </p>
                     </div>
-                    <div class="right">
+                    <div class="right" style="border:1px solid red">
+                        {% include "task/privacy_display.html" %}
                         {% include "task/points_display.html" %}
                         <p>
                             Status: {{g.TASK_STATUSES[task.status]}}
