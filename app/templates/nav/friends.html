@@ -1,11 +1,19 @@
-<li>
-    {% if g.user.users_sending_friend_requests.count() %}
+{% with %}
+
+{% set request_count = g.user.users_sending_friend_requests.count() %}
+
+{% if request_count %}
+    <li data-toggle="tooltip" data-placement="bottom" title="{{request_count}} Friend Requests!">
         <a href="{{url_for('friends')}}">
             <i class="fa fa-users fa-2x">
-                <span class="badge">{{g.user.users_sending_friend_requests.count()}}</span>
+                <span class="badge">{{request_count}}</span>
             </i>
         </a>
-    {% else %}
+    </li>
+{% else %}
+    <li data-toggle="tooltip" data-placement="bottom" title="Friends">
         <a href="{{url_for('friends')}}"><i class="fa fa-users fa-2x"></i></a>
-    {% endif %}
-</li>
+    </li>
+{% endif %}
+
+{% endwith %}

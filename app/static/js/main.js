@@ -1,5 +1,7 @@
 $(document).ready(function(){
 
+    $('[data-toggle="tooltip"]').tooltip({'placement': 'bottom'});
+
     $(".well").css("word-wrap", "break-word");
     $(".panel-body").css("word-wrap", "break-word");
 

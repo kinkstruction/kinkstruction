@@ -1,9 +1,19 @@
-<li>
-    <a href="{{url_for('messages')}}">
-        <i class="fa fa-envelope-o fa-2x">
-            {% if g.user.num_unread_messages() %}
-                <span class="badge">{{g.user.num_unread_messages()}}</span>
-            {% endif %}
-        </i>
-    </a>
-</li>
+{% with num_unread_messages = g.user.num_unread_messages() %}
+
+{% if num_unread_messages %}
+    <li data-toggle="tooltip" data-placement="bottom" title="{{num_unread_messages}} New Messages!">
+        <a href="{{url_for('messages')}}">
+            <i class="fa fa-envelope-o fa-2x">
+                <span class="badge">{{num_unread_messages}}</span>
+            </i>
+        </a>
+    </li>
+{% else %}
+    <li data-toggle="tooltip" data-placement="bottom" title="Private Messages">
+        <a href="{{url_for('messages')}}">
+            <i class="fa fa-envelope-o fa-2x"></i>
+        </a>
+    </li>
+{% endif %}
+
+{% endwith %}

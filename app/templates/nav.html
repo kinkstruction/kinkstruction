@@ -1,20 +1,18 @@
 <div class="left">
-    <ul class="nav nav-pills">
+    <ul class="nav nav-pills main-nav">
         <li><a href="{{url_for('index')}}">Kinkstruction</a></li>
         {% if g.user.is_authenticated() %}
-            <li><a href="{{url_for('profile_page', id=g.user.id)}}">{{g.user.username}}</a></li>
+            {% include "nav/profile.html" %}
             {% include "nav/messages.html" %}
             {% include "nav/friends.html" %}
-            <li>
-                <a href="{{url_for('members')}}"><i class="fa fa-list fa-2x"></i> Members</a>
-            </li>
+            {% include "nav/members.html" %}
         {% endif %}
     <ul>
 </div>
 
 <div class="right">
-    <ul class="nav nav-pills">
-        <li>
+    <ul class="nav nav-pills main-nav">
+        <li data-toggle="tooltip" data-placement="bottom" title="GitHub">
             <a href="http://github.com/kinkstruction/kinkstruction"><i class="fa fa-github fa-2x"></i></a>
         </li>
         {% if g.user.is_authenticated() %}
