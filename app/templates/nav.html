@@ -1,48 +1,40 @@
-<div class="navbar navbar-inverse">
-    <div class="navbar-header">
-        <button type="submit" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-inverse-collapse">
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-        </button>
-        <a class="navbar-brand" href="/">Kinkstruction</a>
-    </div>
-    <div class="navbar-collapse collapse navbar-inverse-collapse">
-        <ul class="nav navbar-nav">
-            {% if g.user.is_authenticated() %}
-                <li class="active"><a href="{{url_for('profile_page', id=g.user.id)}}">Your Profile</a></li>
-                {% include "nav/messages.html" %}
-                {% include "nav/friends.html" %}
-                <li class="active">
-                    <a href="{{url_for('members')}}"><i class="fa fa-list fa-2x"></i> Members</a>
-                </li>
-            {% endif %}
-        </ul>
-        <form class="navbar-form navbar-left">
-            <input id="search_box" type="text" class="form-control col-lg-8" placeholder="Search">
-        </form>
-        <ul class="nav navbar-nav navbar-right">
+<div class="left">
+    <ul class="nav nav-pills">
+        <li><a href="{{url_for('index')}}">Kinkstruction</a></li>
+        {% if g.user.is_authenticated() %}
+            <li><a href="{{url_for('profile_page', id=g.user.id)}}">{{g.user.username}}</a></li>
+            {% include "nav/messages.html" %}
+            {% include "nav/friends.html" %}
             <li>
-                <a href="http://github.com/kinkstruction/kinkstruction"><i class="fa fa-github fa-2x"></i></a>
+                <a href="{{url_for('members')}}"><i class="fa fa-list fa-2x"></i> Members</a>
             </li>
-            {% if g.user.is_authenticated() %}
-                <li class="nav-btn">
-                    <form action="/logout" method="post">
-                        <button id="logout_btn" type="submit" class="btn btn-primary">Log Out</button>
-                    </form>
-                </li>
-            {% else %}
-                <li class="nav-btn">
-                    <form action="/login" method="post">
-                        <button id="login_btn" type="submit" class="btn btn-primary">Log In</button>
-                    </form>
-                </li>
-                <li class="nav-btn">
-                    <form action="/sign_up" method="post">
-                        <button id="register_btn" type="submit" class="btn btn-primary">Sign Up</button>
-                    </form>
-                </li>
-            {% endif %}
-        </ul>
-    </div>
+        {% endif %}
+    <ul>
 </div>
+
+<div class="right">
+    <ul class="nav nav-pills">
+        <li>
+            <a href="http://github.com/kinkstruction/kinkstruction"><i class="fa fa-github fa-2x"></i></a>
+        </li>
+        {% if g.user.is_authenticated() %}
+            <li class="nav-btn">
+                <form action="/logout" method="post">
+                    <button id="logout_btn" type="submit" class="btn btn-primary">Log Out</button>
+                </form>
+            </li>
+        {% else %}
+            <li class="nav-btn">
+                <form action="/login" method="post">
+                    <button id="login_btn" type="submit" class="btn btn-primary">Log In</button>
+                </form>
+            </li>
+            <li class="nav-btn">
+                <form action="/sign_up" method="post">
+                    <button id="register_btn" type="submit" class="btn btn-primary">Sign Up</button>
+                </form>
+            </li>
+        {% endif %}
+    </ul>
+</div>
+<div class="clear"></div>
