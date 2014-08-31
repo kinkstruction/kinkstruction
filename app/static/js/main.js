@@ -1,6 +1,11 @@
 $(document).ready(function(){
 
-    $('[data-toggle="tooltip"]').tooltip({'placement': 'bottom'});
+    $('[data-toggle="tooltip"]').each(function(){
+        var $this = $(this);
+        var placement = $this.data("placement");
+
+        $this.tooltip({placement: placement});
+    });
 
     $(".well").css("word-wrap", "break-word");
     $(".panel-body").css("word-wrap", "break-word");

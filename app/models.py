@@ -2,6 +2,7 @@ import app
 from app import db
 from datetime import datetime, date
 from config import TASK_STATUSES
+from sqlalchemy import or_, and_
 
 
 class Point(db.Model):
@@ -122,6 +123,7 @@ class Task(db.Model):
     doer_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     status = db.Column(db.Integer, default=0)
     log = db.Column(db.String, index=True)
+    privacy = db.Column(db.Integer, default=0)
 
     tasks_todo = db.relationship('User',
         primaryjoin="User.id == Task.doer_id",
@@ -133,7 +135,8 @@ class Task(db.Model):
 
     __table_args__ = (
         db.CheckConstraint("requester_id != doer_id"),
-        db.CheckConstraint("status in (" + ",".join([str(x) for x in TASK_STATUSES.keys()]) + ")")
+        db.CheckConstraint("status in (" + ",".join([str(x) for x in TASK_STATUSES.keys()]) + ")"),
+        db.CheckConstraint("privacy in (0,1,2)", "privacy_check")
     )
 
     def requester(self):
@@ -192,8 +195,61 @@ class User(db.Model):
         db.CheckConstraint('age is null or (age >= 18 and age <= 100)')
     )
 
+    def viewable_public_tasks(self):
+        return Task.query.filter(
+            or_(
+                Task.privacy == 0,
+                and_(
+                    Task.privacy == 1,
+                    or_(
+                        Task.doer_id.in_([x.id for x in self.friends.all()]),
+                        Task.requester_id.in_([x.id for x in self.friends.all()])
+                    )
+                ),
+                and_(
+                    Task.privacy == 2,
+                    or_(
+                        Task.doer_id == self.id,
+                        Task.requester_id == self.id
+                    )
+                )
+            )
+        )
+
+    def viewable_friend_tasks(self):
+        return Task.query.filter(
+            or_(
+                and_(
+                    Task.privacy == 1,
+                    or_(
+                        Task.doer_id.in_([x.id for x in self.friends.all()]),
+                        Task.requester_id.in_([x.id for x in self.friends.all()])
+                    )
+                ),
+                and_(
+                    Task.privacy == 2,
+                    or_(
+                        Task.doer_id == self.id,
+                        Task.requester_id == self.id
+                    )
+                )
+            )
+
+        )
+
+    def viewable_private_tasks(self):
+        return Task.query.filter(
+            and_(
+                Task.privacy == 2,
+                or_(
+                    Task.doer_id == self.id,
+                    Task.requester_id == self.id
+                )
+            )
+        )
+
     def is_friend(self, friend_id):
-        return friend_id in [x.id for x in self.friends]
+        return friend_id in [x.id for x in self.friends.all()]
 
     def is_friends_with(self, other):
         return other.id in [x.id for x in self.friends.all()]

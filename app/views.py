@@ -88,7 +88,7 @@ def index(page=1):
             else:
                 tasks = g.user.tasks_todo.filter(Task.status < 3).order_by(Task.status.desc()).paginate(page, NUM_TASKS_PER_PAGE, False)
 
-        last_seen_members = User.query.filter(User.last_seen != None).order_by(User.last_seen.desc()).limit(6)
+        last_seen_members = User.query.filter(User.last_seen.isnot(None)).order_by(User.last_seen.desc()).limit(6)
 
     return render_template("index.html", tasks=tasks, requested=requested, page=page, completed=completed, last_seen_members=last_seen_members)
 
@@ -134,6 +134,35 @@ def view_task(id):
     posts = task.posts.filter_by(task_id=task.id).order_by(TaskPost.created).paginate(page, NUM_TASK_POSTS_PER_PAGE, False)
 
     return render_template("view_task.html", task=task, posts=posts)
+
+
+@app.route("/tasks/public/<int:page>", methods=['GET', 'POST'])
+@app.route("/tasks/public", methods=['GET', 'POST'])
+@login_required
+def all_tasks(page=1):
+
+    tasks = g.user.viewable_public_tasks().order_by(Task.created.desc()).paginate(page, NUM_TASKS_PER_PAGE, False)
+
+    return render_template("task/list.html", tasks=tasks, endpoint="all_tasks")
+
+
+@app.route("/tasks/friends/<int:page>", methods=['GET', 'POST'])
+@app.route("/tasks/friends", methods=['GET', 'POST'])
+@login_required
+def friend_tasks(page=1):
+
+    tasks = g.user.viewable_friend_tasks().order_by(Task.created.desc()).paginate(page, NUM_TASKS_PER_PAGE, False)
+
+    return render_template("task/list.html", tasks=tasks, endpoint="friend_tasks")
+
+
+@app.route("/tasks/private/<int:page>", methods=['GET', 'POST'])
+@app.route("/tasks/private", methods=['GET', 'POST'])
+@login_required
+def private_tasks(page=1):
+    tasks = g.user.viewable_private_tasks().order_by(Task.created.desc()).paginate(page, NUM_TASKS_PER_PAGE, False)
+
+    return render_template("task/list.html", tasks=tasks, endpoint="private_tasks")
 
 
 @app.route("/task/add_post/<int:id>", methods=['GET', 'POST'])

@@ -1,0 +1,22 @@
+<li class="dropdown">
+    <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+        Tasks <i class="fa fa-caret-down"></i>
+    </a>
+    <ul class="dropdown-menu">
+        <li>
+            <a href="{{url_for('all_tasks')}}">
+                <i class="fa fa-globe fa-2x"></i> All Tasks
+            </a>
+        </li>
+        <li>
+            <a href="{{url_for('friend_tasks')}}">
+                <i class="fa fa-users fa-2x"></i> Tasks of Friends
+            </a>
+        </li>
+        <li>
+            <a href="{{url_for('private_tasks')}}">
+                <i class="fa fa-user fa-2x"></i> Private Tasks
+            </a>
+        </li>
+    </ul>
+</li>
