@@ -6,7 +6,8 @@
             <h2>{{task.title}}</h2>
         </div>
         <div class="right">
-            <p>Created: {{task.created}}</p>
+            <p>Created: <span class="moment-js">{{task.created}}</span></p>
+            {% include "task/points_display.html" %}
             <p>
                 Status: {{g.TASK_STATUSES[task.status]}}
             </p>
@@ -47,12 +48,10 @@
                     </form>
                 </p>
             {% endif %}
+
+            {% if not edit and task.requester_id == g.user.id %}
+                <a class="btn btn-primary btn-lg" href="{{url_for('update_task', id=task.id)}}">Edit Task</a>
+            {% endif %}
         </div>
-
-        {% if not edit and task.requester_id == g.user.id %}
-            <a class="btn btn-primary btn-lg" href="{{url_for('update_task', id=task.id)}}">Edit Post</a>
-        {% endif %}
-
-
     </div>
 {% endblock %}

@@ -1,0 +1,14 @@
+{% if task.points %}
+    {% with %}
+        {% set points = task.points.first() %}
+        <p>
+            Points: {{points.points}}
+            {% if points.awarded %}
+                ({{points.awarded}} awarded)
+            {% endif %}
+            {% if points.spent > 0 %}
+                ({{points.spent}} spent)
+            {% endif %}
+        </p>
+    {% endwith %}
+{% endif %}

@@ -1,6 +1,6 @@
 <div class="panel panel-default">
     <div class="panel-heading">
-        From: <a href="{{url_for('profile_page', id=post.author.id)}}">{{post.author.username}}</a>, created {{post.created}}
+        From: <a href="{{url_for('profile_page', id=post.author.id)}}">{{post.author.username}}</a>, created <span class="moment-js">{{post.created}}</span>
     </div>
     <div class="panel-body">
 {% filter markdown %}

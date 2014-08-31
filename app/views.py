@@ -1,7 +1,7 @@
 from app import app, db, lm, bcrypt, mailer
 from flask import render_template, g, url_for, session, flash, redirect, request, Markup
 from flask.ext.login import login_user, logout_user, current_user, login_required, AnonymousUserMixin
-from app.models import User, Friend, FriendRequest, Message, Task, TaskPost
+from app.models import User, Friend, FriendRequest, Message, Task, TaskPost, Point, TaskHistory
 from forms import *
 from markdown import markdown
 from config import *
@@ -117,7 +117,17 @@ def view_task(id):
     if page is None:
         page = 1
     elif page == "last":
-        page = int(floor(task.posts.filter_by(task_id=task.id).count() / NUM_TASK_POSTS_PER_PAGE)) + 1
+        post_count = task.posts.count()
+
+        # If NUM_TASK_POSTS_PER_PAGE does not evenly divide post_count, then
+        # proceed as usual: take the quotient, floor it, add 1
+        page = int(floor(post_count / NUM_TASK_POSTS_PER_PAGE)) + 1
+
+        # But otherwise, we need to subtract 1 from page in order
+        # to avoid having no tasks and just the "add post" form.
+        if post_count % NUM_TASK_POSTS_PER_PAGE == 0:
+            page -= 1
+
     else:
         page = int(page)
 
@@ -179,7 +189,7 @@ def create_task(id):
         flash("You can only create tasks for friends!", "error")
         return redirect(url_for("profile_page", id=id))
 
-    form = CreateOrUpdateTaskForm()
+    form = CreateTaskForm()
 
     if form.validate_on_submit():
         title = form.title.data
@@ -189,98 +199,160 @@ def create_task(id):
         db.session.add(task)
         db.session.commit()
 
+        num_points = form.points.data
+
+        if num_points is None:
+            num_points = 0
+
+        pt = Point(user_id=task.doer_id, task_id=task.id, points=num_points)
+
+        db.session.add(pt)
+        db.session.commit()
+
         flash("Task created!", "success")
-        return redirect(url_for("view_task", id=task.id))
 
         email_body = render_template("mail/new_task.html", task=task)
         subject = "%s Has Created A New Task For You!" % g.user.username
 
         mailer.send_mail(task.doer.email, subject, email_body)
 
-    return render_template("create_task.html", form=form)
+        return redirect(url_for("view_task", id=task.id))
+
+    return render_template("task/new.html", form=form)
 
 
-@app.route("/task/<int:id>/set_status/<int:status>", methods=['GET', 'POST'])
+@app.route("/task/start/<int:id>", methods=['GET', 'POST'])
 @login_required
-def task_set_status(id, status):
-    if status not in TASK_STATUSES:
-        flash("No such status exists!", "error")
-        return redirect(url_for("index"))
+def task_start(id):
 
     task = Task.query.filter_by(id=id).first()
 
     if task is None:
-        flash("No such task was found!", "error")
+        flash("No such task!", "error")
         return redirect(url_for("index"))
 
-    if g.user.id == task.doer_id:
-        errorMsg = None
-
-        if status > 2:
-            errorMsg = "You cannot set that status for tasks assigned to you!"
-        elif status == 0 and task.status > 0:
-            errorMsg = "You can't unstart a task that has been started or completed!"
-        elif status == 0:
-            errorMsg = Markup("Why are you trying to set the status of this task <em>to its current status</em>?!")
-
-        if errorMsg:
-            flash(errorMsg, "error")
-
-        task.status = status
-        db.session.add(task)
+    if TASK_STATUSES[task.status] != "Not Started":
+        flash("You can't start a task that has already been started!", "error")
+    elif g.user.id != task.doer_id:
+        flash("You cannot start a task that was not assigned to you!", "error")
+    else:
+        th = TaskHistory(task_id=id, prev_status=0, new_status=1)
+        db.session.add(th)
         db.session.commit()
-        flash("Status updated!", "success")
 
-        if not errorMsg:
-
-            subject = None
-            email_body = None
-
-            if task.status == 1:
-                subject = "%s Has Started Task '%s'" % (task.doer.username, task.title)
-                email_body = render_template("mail/task_started.html", task=task)
-            elif task.status == 2:
-                subject = "Awaiting Your Approval: %s Has Completed Task '%s'" % (task.doer.username, task.title)
-                email_body = render_template("mail/task_doer_completed.html", task=task)
-
-            if subject and email_body:
-                mailer.send_mail(task.requester.email, subject, email_body)
-
-    elif g.user.id == task.requester_id:
-        errorMsg = None
-
-        if status == 0:
-            errorMsg = "You can't unstart tasks!"
-        elif status <= 2:
-            errorMsg = "You can't start or complete a task that you've assigned to someone else!"
-
-        if errorMsg:
-            flash(errorMsg, "error")
-
-        task.status = status
+        task.status = 1
         db.session.add(task)
         db.session.commit()
 
-        if status == 3:
-            flash("Task accepted as complete!", "success")
-        elif status == 4:
-            flash("Task rejected! How about a punishment task for %s?" % task.doer.username, "success")
-        else:
-            flash("Status updated!", "success")
+        flash("Task '%s' has been started!" % task.title, "success")
 
-        if not errorMsg:
-            subject = None
-            email_body = None
+        subject = "%s Has Started Task '%s'" % (task.doer.username, task.title)
+        email_body = render_template("mail/task_started.html", task=task)
 
-            if task.status == 3:
-                subject = "%s Has Accepted Task '%s'!" % (task.requester.username, task.title)
-                email_body = render_template("mail/task_accepted.html", task=task)
-            elif task.status == 4:
-                subject = "%s Has Rejected Task '%s'!" % (task.requester.username, task.title)
-                email_body = render_template("mail/task_rejected.html", task=task)
+        mailer.send_mail(task.requester.email, subject, email_body)
 
-            if subject and email_body:
-                mailer.send_mail(task.doer.email, subject, email_body)
+    return redirect(url_for("view_task", id=id))
+
+
+@app.route("/task/complete/<int:id>", methods=['GET', 'POST'])
+@login_required
+def task_complete(id):
+
+    task = Task.query.filter_by(id=id).first()
+
+    if task is None:
+        flash("No such task!", "error")
+        return redirect(url_for("index"))
+
+    if TASK_STATUSES[task.status] != "Started":
+        flash("You can't complete a task that has a status of '%s'" % TASK_STATUSES[task.status], "error")
+    elif g.user.id != task.doer_id:
+        flash("You can't complete a task that was not assigned to you!", "error")
+    else:
+
+        completed = datetime.utcnow()
+        th = TaskHistory(task_id=id, prev_status=1, new_status=2, timestamp=completed)
+        db.session.add(th)
+        db.session.commit()
+
+        task.status = 2
+        task.completed = completed
+        db.session.add(task)
+        db.session.commit()
+
+        flash("Task '%s' completed!", "success")
+
+        subject = "Awaiting Your Approval: %s Has Completed Task '%s'" % (task.doer.username, task.title)
+        email_body = render_template("mail/task_doer_completed.html", task=task)
+        mailer.send_mail(task.requester.email, subject, email_body)
+
+    return redirect(url_for("view_task", id=id))
+
+
+@app.route("/task/accept/<int:id>", methods=['GET', 'POST'])
+@login_required
+def task_accept(id):
+
+    task = Task.query.filter_by(id=id).first()
+
+    if task is None:
+        flash("No such task!", "error")
+        return redirect(url_for("index"))
+
+    if TASK_STATUSES[task.status] != "Completed, not yet accepted":
+        flash("You cannot accept a task that has not been completed (and awaiting acceptance)!", "error")
+    elif g.user.id != task.requester_id:
+        flash("You cannot accept a task that you did not assign!", "error")
+    else:
+        th = TaskHistory(task_id=id, prev_status=2, new_status=3)
+        db.session.add(th)
+        db.session.commit()
+
+        task.status = 3
+        pt = task.points.first()
+
+        pt.awarded = pt.points
+
+        db.session.add(task)
+        db.session.add(pt)
+        db.session.commit()
+
+        flash("Task '%s' accepted!" % task.title, "success")
+
+        subject = "%s Has Accepted Task '%s'!" % (task.requester.username, task.title)
+        email_body = render_template("mail/task_accepted.html", task=task)
+        mailer.send_mail(task.doer.email, subject, email_body)
+
+    return redirect(url_for("view_task", id=id))
+
+
+@app.route("/task/reject/<int:id>", methods=['GET', 'POST'])
+@login_required
+def task_reject(id):
+    task = Task.query.filter_by(id=id).first()
+
+    if task is None:
+        flash("No such task!", "error")
+        return redirect(url_for("index"))
+
+    if TASK_STATUSES[task.status] != "Completed, not yet accepted":
+        flash("You cannot reject a task that has not been completed (and awaiting acceptance)!", "error")
+    elif g.user.id != task.requester_id:
+        flash("You cannot reject a task that you did not assign!", "error")
+    else:
+        th = TaskHistory(task_id=id, prev_status=2, new_status=4)
+        db.session.add(th)
+        db.session.commit()
+
+        task.status = 4
+        db.session.add(task)
+        db.session.commit()
+
+        flash("Task rejected! How about a punishment task for %s?" % task.doer.username, "success")
+
+        subject = "%s Has Rejected Task '%s'!" % (task.requester.username, task.title)
+        email_body = render_template("mail/task_rejected.html", task=task)
+        mailer.send_mail(task.doer.email, subject, email_body)
 
     return redirect(url_for("view_task", id=id))
 
@@ -298,7 +370,7 @@ def update_task(id):
         flash("You can't edit the description for this task because you didn't assign it.", "error")
         return redirect(url_for("view_task", id=id))
 
-    form = CreateOrUpdateTaskForm()
+    form = UpdateTaskForm()
 
     if form.validate_on_submit():
         title = form.title.data

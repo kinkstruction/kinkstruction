@@ -6,7 +6,7 @@ from app.models import User, Task
 # TODO: Refactor the living bejeezus out of this...
 
 
-class CreateOrUpdateTaskForm(Form):
+class UpdateTaskForm(Form):
     title = StringField('Title: ',
         validators=[
             Required(),
@@ -14,6 +14,10 @@ class CreateOrUpdateTaskForm(Form):
         ]
     )
     description = TextAreaField('Description: ', validators=[Required()])
+
+
+class CreateTaskForm(UpdateTaskForm):
+    points = IntegerField('Points: ', default=0, validators=[NumberRange(min=0)])
 
 
 class UpdateTaskLogForm(Form):

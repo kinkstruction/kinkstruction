@@ -4,6 +4,34 @@ from datetime import datetime, date
 from config import TASK_STATUSES
 
 
+class Point(db.Model):
+    __tablename__ = "points"
+    id = db.Column(db.Integer, primary_key=True)
+    points = db.Column(db.Integer, default=0)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    task_id = db.Column(db.Integer, db.ForeignKey("tasks.id"))
+    spent = db.Column(db.Integer, default=0)
+    awarded = db.Column(db.Integer, default=0)
+
+    user = db.relationship("User", backref=db.backref("points", lazy="dynamic"))
+    task = db.relationship("Task", backref=db.backref("points", lazy="dynamic"))
+
+    def issuing_user(self):
+        return User.query.filter_by(id=self.task.requester_id).first()
+
+    def __repr__(self):
+
+        if self.task_id:
+            return "<Point: Task %d, User: %d, Points: %d>" % (self.task_id, self.user_id, self.points)
+        else:
+            return "<Point: User: %d, Points: %d>" % (self.user_id, self.points)
+
+    __table_args__ = (
+        db.CheckConstraint("spent >= 0 and spent <= points", name="spent_check"),
+        db.CheckConstraint("awarded >= 0 and awarded <= points", name="awarded_check")
+    )
+
+
 class FriendRequest(db.Model):
     __tablename__ = "friend_requests"
     id = db.Column(db.Integer, primary_key=True)
@@ -72,6 +100,15 @@ class TaskPost(db.Model):
     author = db.relationship('User',
         primaryjoin="User.id == TaskPost.user_id",
         backref=db.backref("task_posts", lazy="dynamic"))
+
+
+class TaskHistory(db.Model):
+    __tablename__ = "task_history"
+    id = db.Column(db.Integer, primary_key=True)
+    task_id = db.Column(db.Integer, db.ForeignKey("tasks.id"), nullable=False, index=True)
+    prev_status = db.Column(db.Integer, nullable=False)
+    new_status = db.Column(db.Integer, nullable=False)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
 
 class Task(db.Model):
