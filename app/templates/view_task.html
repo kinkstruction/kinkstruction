@@ -13,10 +13,11 @@
                 Status: {{g.TASK_STATUSES[task.status]}}
             </p>
             {#
-                Block that says "Assigned by", "Assigned to", and
+                Blocks that say "Assigned by", "Assigned to", and
                 buttons for updating status (if applicable)
             #}
-            {% include "task/assigned_and_statuses.html" %}
+            {% include "task/assigned.html" %}
+            {% include "task/change_status_button.html" %}
         </div>
         <div class="clear"></div>
 

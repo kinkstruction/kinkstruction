@@ -12,8 +12,9 @@
                         <p>
                             Created: <span class="moment-js">{{task.created}}</span>
                         </p>
+                        {% include "task/assigned_no_profile_links.html" %}
                     </div>
-                    <div class="right" style="border:1px solid red">
+                    <div class="right">
                         {% include "task/privacy_display.html" %}
                         {% include "task/points_display.html" %}
                         <p>

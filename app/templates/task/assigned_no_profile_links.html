@@ -1,0 +1,17 @@
+{# This produces the same text as the task/assigned.html template, but without the hyperlinks for
+    profiles. This is useful for inclusion in a list-group of <a> elements (since anchors within anchors are bad...)
+#}
+
+{% if g.user.id == task.doer_id %}
+    <p>
+        Assigned to you by {{task.requester.username}}
+    </p>
+{% elif g.user.id == task.requester_id %}
+    <p>
+        Assigned to {{task.doer.username}} by you.
+    </p>
+{% else %}
+    <p>
+        Assigned to {{task.doer.username}} by {{task.requester.username}}
+    </p>
+{% endif %}

@@ -222,13 +222,18 @@ def create_task(id):
 
     form = CreateTaskForm()
 
+    # AH HA!!!! Need to do this manual coercion to int, otherwise
+    # the form is NEVER validated! Gods, this was driving me INSANE!!!
+    try:
+        form.privacy.data = int(form.privacy.data)
+    except:
+        form.privacy.data = 0
+
     if form.validate_on_submit():
-        print "HOOHAH!"
-        print form.privacy.data
 
         title = form.title.data
         description = form.description.data
-        privacy = form.privacy.data
+        privacy = int(form.privacy.data)
 
         task = Task(title=title, description=description, requester_id=g.user.id, doer_id=id, status=0, privacy=privacy)
         db.session.add(task)
@@ -253,11 +258,7 @@ def create_task(id):
 
         return redirect(url_for("view_task", id=task.id))
 
-    else:
-        print "Didn't validate...got privacy of %s" % form.privacy.data
-
-        form.privacy.data = 0
-        return render_template("task/new.html", form=form)
+    return render_template("task/new.html", form=form)
 
 
 @app.route("/task/start/<int:id>", methods=['GET', 'POST'])
@@ -412,11 +413,17 @@ def update_task(id):
     form = UpdateTaskForm()
 
     if form.validate_on_submit():
+
+        print "\n\nForm Validated: "
+        print form.data
+        print "\n\n"
         title = form.title.data
         description = form.description.data
 
         task.description = description
         task.title = title
+        task.privacy = form.privacy.data
+
         db.session.add(task)
         db.session.commit()
 
@@ -431,6 +438,7 @@ def update_task(id):
     else:
         form.title.data = task.title
         form.description.data = task.description
+        form.privacy.data = task.privacy
         return render_template("view_task.html", edit=True, form=form, task=task)
 
 

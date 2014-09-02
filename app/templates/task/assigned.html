@@ -1,0 +1,13 @@
+{% if g.user.id == task.doer_id %}
+    <p>
+        Assigned to you by <a href="{{url_for('profile_page', id=task.requester_id)}}">{{task.requester.username}}</a>
+    </p>
+{% elif g.user.id == task.requester_id %}
+    <p>
+        Assigned to <a href="{{url_for('profile_page', id=task.doer_id)}}">{{task.doer.username}}</a> by you.
+    </p>
+{% else %}
+    <p>
+        Assigned to <a href="{{url_for('profile_page', id=task.doer_id)}}">{{task.doer.username}}</a> by <a href="{{url_for('profile_page', id=task.requester_id)}}">{{task.requester.username}}</a>
+    </p>
+{% endif %}

@@ -10,10 +10,10 @@
             {{form_group_field(form.points, size=5)}}
             (Points will be awarded upon acceptance of the task)
             {{form_group_field(form.description, cols=48, rows=12)}}
-
+            {{form.privacy}}
             <div class="form-group">
                 <div class="col-md-8">
-                    {{form.privacy}}
+
                     <!-- {% for subfield in form.privacy %} -->
                     <!-- <p>
                         {{subfield}} {{subfield.label}}

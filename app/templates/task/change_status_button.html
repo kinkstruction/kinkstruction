@@ -1,7 +1,4 @@
 {% if g.user.id == task.doer_id %}
-    <p>
-        Assigned to you by <a href="{{url_for('profile_page', id=task.requester_id)}}">{{task.requester.username}}</a>
-    </p>
     {% if task.status == 0 %}
         <form action="{{url_for('task_start', id=task.id)}}" method="post">
             <button type="submit" class="btn btn-success">
@@ -16,9 +13,6 @@
         </form>
     {% endif %}
 {% elif g.user.id == task.requester_id %}
-    <p>
-        Assigned to <a href="{{url_for('profile_page', id=task.doer_id)}}">{{task.doer.username}}</a> by you.
-    </p>
     {% if task.status == 2 %}
         <p>
             <form action="{{url_for('task_accept', id=task.id)}}" method="post">
