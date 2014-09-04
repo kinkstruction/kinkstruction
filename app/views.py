@@ -93,6 +93,42 @@ def index(page=1):
     return render_template("index.html", tasks=tasks, requested=requested, page=page, completed=completed, last_seen_members=last_seen_members)
 
 
+@app.route("/options", methods=['GET', 'POST'])
+@login_required
+def options():
+
+    form = OptionsForm()
+
+    if form.validate_on_submit():
+
+        username = form.username.data
+        password = form.password.data
+        changes_made = False
+
+        if username and username != g.user.username:
+            if not User.query.filter_by(username=username).count():
+                g.user.username = username
+                changes_made = True
+                flash("Username updated!", "success")
+            else:
+                flash("Sorry, that username is taken.", "error")
+
+        if password and not bcrypt.check_password_hash(g.user.pw_hash, password):
+            g.user.pw_hash = bcrypt.generate_password_hash(password)
+            changes_made = True
+
+        if changes_made:
+            db.session.add(g.user)
+            db.session.commit()
+        else:
+            flash("No changes were made...", "warning")
+
+    else:
+        form.username.data = g.user.username
+
+    return render_template("options.html", form=form)
+
+
 @app.route("/members/<int:page>", methods=['GET', 'POST'])
 @app.route("/members", methods=['GET', 'POST'])
 @login_required

@@ -7,6 +7,11 @@
             {% include "nav/friends.html" %}
             {% include "nav/members.html" %}
             {% include "nav/tasks.html" %}
+            <li data-toggle="tooltip" data-placement="bottom" title="Options">
+                <a href="{{url_for('options')}}">
+                    <i class="fa fa-gear fa-2x"></i>
+                </a>
+            </li>
         {% endif %}
     <ul>
 </div>

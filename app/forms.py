@@ -6,6 +6,25 @@ from app.models import User, Task
 # TODO: Refactor the living bejeezus out of this...
 
 
+class OptionsForm(Form):
+    username = StringField('Username: ',
+        validators=[
+            Optional(),
+            Length(min=2, max=256, message="Usernames must be between 2 and 256 characters")
+        ]
+
+    )
+
+    password = PasswordField('Password: ',
+        validators=[
+            Optional(),
+            Length(min=2, max=256, message="Passwords must be between 2 and 256 characters")
+        ]
+    )
+
+    confirm_password = PasswordField('Confirm Password: ', validators=[EqualTo('password', message="The passwords do not match"), Optional()])
+
+
 class UpdateTaskForm(Form):
 
     title = StringField('Title: ',
