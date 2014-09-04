@@ -24,6 +24,18 @@ class OptionsForm(Form):
 
     confirm_password = PasswordField('Confirm Password: ', validators=[EqualTo('password', message="The passwords do not match"), Optional()])
 
+    profile_privacy = SelectField('Profile Privacy: ', choices=[
+        (0, "Public (any member can view your profile)"),
+        (1, "Friends (only friends can view your profile)"),
+        (2, "Private (only you can see your profile)")
+    ], validators=[Optional()], coerce=int)
+
+    default_task_privacy = SelectField("Default Task Privacy: ", choices=[
+        (0, "Public (can be seen by any member)"),
+        (1, "Friends (can be seen by friends of either you or the assignee)"),
+        (2, "Private (can be seen only by you and the assignee)")
+    ], default=0, validators=[Optional()], coerce=int)
+
 
 class UpdateTaskForm(Form):
 

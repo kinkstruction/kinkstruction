@@ -136,7 +136,7 @@ class Task(db.Model):
     __table_args__ = (
         db.CheckConstraint("requester_id != doer_id"),
         db.CheckConstraint("status in (" + ",".join([str(x) for x in TASK_STATUSES.keys()]) + ")"),
-        db.CheckConstraint("privacy in (0,1,2)", "privacy_check")
+        db.CheckConstraint("privacy in (0,1,2)", name="privacy_check")
     )
 
     def requester(self):
@@ -147,6 +147,19 @@ class Task(db.Model):
 
     def __repr__(self):
         return "<Task: Requester: %d, doer: %d, '%r'>" % (self.requester_id, self.doer_id, self.title)
+
+
+class UserOptions(db.Model):
+    __tablename__ = "user_options"
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+    profile_privacy = db.Column(db.Integer, default=0)
+    default_task_privacy = db.Column(db.Integer, default=0)
+
+    __table_args__ = (
+        db.CheckConstraint("profile_privacy in (0,1,2)", name="profile_privacy_check"),
+        db.CheckConstraint("default_task_privacy in (0,1,2)", name="default_task_privacy_check")
+    )
 
 
 class User(db.Model):
@@ -166,6 +179,8 @@ class User(db.Model):
     password_reset_token = db.Column(db.String)
     password_reset_token_expiration = db.Column(db.DateTime)
     last_seen = db.Column(db.DateTime, default=datetime.utcnow)
+
+    options = db.relationship('UserOptions', uselist=False, backref="user")
 
     doer = db.relationship('Task',
         primaryjoin="User.id == Task.doer_id",

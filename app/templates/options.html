@@ -1,6 +1,7 @@
 {% from "_macros.html" import form_group_field %}
 {% extends "base.html" %}
 {% block content %}
+
     <form class="form-horizontal" action="" method="post">
         {{form.hidden_tag()}}
         <fieldset>
@@ -9,6 +10,12 @@
             {{form_group_field(form.username, size=20, maxlength=256)}}
             {{form_group_field(form.password, size=20, maxlength=256)}}
             {{form_group_field(form.confirm_password, size=20, maxlength=256)}}
+
+            <legend>Profile Privacy:</legend>
+            <p>{{form.profile_privacy}}</p>
+
+            <legend>Default Task Privacy:</legend>
+            <p>{{form.default_task_privacy}}</p>
         </fieldset>
         <div class="col-md-2">
             <input type="submit" name="log_in" value="Save Changes">

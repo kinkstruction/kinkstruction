@@ -99,32 +99,65 @@ def options():
 
     form = OptionsForm()
 
+    try:
+        form.profile_privacy.data = int(form.profile_privacy.data)
+    except:
+        form.profile_privacy.data = g.user.options.profile_privacy
+
+    try:
+        form.default_task_privacy.data = int(form.default_task_privacy.data)
+    except:
+        form.default_task_privacy.data = g.user.options.default_task_privacy
+
     if form.validate_on_submit():
 
         username = form.username.data
         password = form.password.data
-        changes_made = False
+        profile_privacy = int(form.profile_privacy.data)
+        default_task_privacy = int(form.default_task_privacy.data)
+
+        user_changes_made = False
+        options_changes_made = False
 
         if username and username != g.user.username:
             if not User.query.filter_by(username=username).count():
                 g.user.username = username
-                changes_made = True
+                user_changes_made = True
                 flash("Username updated!", "success")
             else:
                 flash("Sorry, that username is taken.", "error")
 
         if password and not bcrypt.check_password_hash(g.user.pw_hash, password):
             g.user.pw_hash = bcrypt.generate_password_hash(password)
-            changes_made = True
+            user_changes_made = True
+            flash("Password Changed!", "success")
 
-        if changes_made:
+        if profile_privacy != g.user.options.profile_privacy:
+            g.user.options.profile_privacy = profile_privacy
+            options_changes_made = True
+            flash("Profile Privacy Changed!", "success")
+
+        if default_task_privacy != g.user.options.default_task_privacy:
+            g.user.options.default_task_privacy = default_task_privacy
+            options_changes_made = True
+            flash("Default Task Privacy Changed!", "success")
+
+        if user_changes_made:
             db.session.add(g.user)
             db.session.commit()
-        else:
+
+        if options_changes_made:
+            db.session.add(g.user.options)
+            db.session.commit()
+
+        if not user_changes_made and not options_changes_made:
             flash("No changes were made...", "warning")
 
     else:
         form.username.data = g.user.username
+
+        form.profile_privacy.data = g.user.options.profile_privacy
+        form.default_task_privacy.data = g.user.options.default_task_privacy
 
     return render_template("options.html", form=form)
 
@@ -245,8 +278,6 @@ def add_post_to_task(id):
 @app.route("/task/new/<int:id>", methods=['GET', 'POST'])
 @login_required
 def create_task(id):
-
-    print request.values.get("privacy")
 
     user = User.query.filter_by(id=id).first()
     if user is None:
@@ -450,9 +481,6 @@ def update_task(id):
 
     if form.validate_on_submit():
 
-        print "\n\nForm Validated: "
-        print form.data
-        print "\n\n"
         title = form.title.data
         description = form.description.data
 
