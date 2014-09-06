@@ -292,9 +292,13 @@ def create_task(id):
     # AH HA!!!! Need to do this manual coercion to int, otherwise
     # the form is NEVER validated! Gods, this was driving me INSANE!!!
     try:
+        print "At beginning of try branch, and we have form.privacy.data=%s" % form.privacy.data
         form.privacy.data = int(form.privacy.data)
+        print "End of try branch, form.privacy.data=%s" % form.privacy.data
     except:
-        form.privacy.data = 0
+        form.privacy.data = g.user.options.default_task_privacy
+        print "In except branch, form.privacy.data=%d" % form.privacy.data
+        print "Also, g.user.options.default_task_privacy=%d" % g.user.options.default_task_privacy
 
     if form.validate_on_submit():
 
@@ -324,6 +328,11 @@ def create_task(id):
         mailer.send_mail(task.doer.email, subject, email_body)
 
         return redirect(url_for("view_task", id=task.id))
+
+    print "WTF"
+    print "default task privacy = %s" % g.user.options.default_task_privacy
+    form.privacy.data = g.user.options.default_task_privacy
+    print "form.privacy.data should be 2, instead it's %d" % form.privacy.data
 
     return render_template("task/new.html", form=form)
 
@@ -772,13 +781,18 @@ def logout():
 @app.route("/profile/<int:id>")
 @login_required
 def profile_page(id):
-    # TODO: Here is where we would also filter by privacy setting(s)
+
     user = User.query.filter_by(id=id).first()
 
     if user is None:
-        return render_template(url_for("index"))
+        flash("No such user!", "error")
+        return redirect(url_for("index"))
 
-    return render_template("profile.html", user=user, title=user.username + " - Kinkstruction")
+    if g.user.can_view_profile(user):
+        return render_template("profile.html", user=user, title=user.username + " - Kinkstruction")
+
+    flash("You are not allowed to view that!", "error")
+    return redirect(url_for("index"))
 
 
 @app.route("/profile/edit", methods=['GET', 'POST'])

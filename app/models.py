@@ -210,6 +210,15 @@ class User(db.Model):
         db.CheckConstraint('age is null or (age >= 18 and age <= 100)')
     )
 
+    def can_view_profile(self, other):
+        if self.id == other.id or other.options.profile_privacy == 0:
+            return True
+
+        if other.options.profile_privacy == 1 and self.is_friends_with(other):
+            return True
+
+        return False
+
     def viewable_public_tasks(self):
         return Task.query.filter(
             or_(

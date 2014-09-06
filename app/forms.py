@@ -65,7 +65,7 @@ class CreateTaskForm(Form):
         (0, "Public (can be seen by any member)"),
         (1, "Friends (can be seen by friends of either you or the assignee)"),
         (2, "Private (can be seen only by you and the assignee)")
-    ], default=0, validators=[Optional()])
+    ], coerce=int, validators=[Optional()])
     points = IntegerField('Points: ', default=0, validators=[NumberRange(min=0)])
 
 
