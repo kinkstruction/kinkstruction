@@ -1,0 +1,11 @@
+{% filter markdown %}
+Dear {{user.username}},
+
+Good news! {{g.user.username}} has accepted your friend request! To see a list of your current friends, go to:
+
+{{url_for('friends', id=user.id)}}
+
+Sincerely,
+
+The Kinkstruction Admin
+{% endfilter %}

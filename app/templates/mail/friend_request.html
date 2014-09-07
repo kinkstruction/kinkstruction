@@ -1,0 +1,11 @@
+{% filter markdown %}
+Dear {{user.username}},
+
+{{g.user.username}} has sent you a friend request! To view this request, go to the following URL:
+
+{{url_for('friends', id=user.id)}}
+
+Sincerely,
+
+The Kinkstruction Admin
+{% endfilter %}

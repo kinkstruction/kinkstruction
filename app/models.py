@@ -151,10 +151,21 @@ class Task(db.Model):
 
 class UserOptions(db.Model):
     __tablename__ = "user_options"
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), primary_key=True)
     profile_privacy = db.Column(db.Integer, default=0)
     default_task_privacy = db.Column(db.Integer, default=0)
+
+    task_created_email_alert = db.Column(db.Boolean, default=True)
+    task_edit_email_alert = db.Column(db.Boolean, default=True)
+    task_start_email_alert = db.Column(db.Boolean, default=True)
+    task_complete_email_alert = db.Column(db.Boolean, default=True)
+    task_accept_reject_email_alert = db.Column(db.Boolean, default=True)
+    task_new_post_email_alert = db.Column(db.Boolean, default=True)
+
+    friend_request_email_alert = db.Column(db.Boolean, default=True)
+    friend_request_accept_email_alert = db.Column(db.Boolean, default=True)
+
+    message_new_email_alert = db.Column(db.Boolean, default=True)
 
     __table_args__ = (
         db.CheckConstraint("profile_privacy in (0,1,2)", name="profile_privacy_check"),

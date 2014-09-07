@@ -267,10 +267,11 @@ def add_post_to_task(id):
         elif g.user.id == task.requester_id:
             user = task.doer
 
-        email_body = render_template("mail/task_post_created.html", user=user, task=task, post=task_post)
-        subject = "%s Updated The Task '%s'" % (g.user.username, task.title)
+        if user.options.task_new_post_email_alert:
+            email_body = render_template("mail/task_post_created.html", user=user, task=task, post=task_post)
+            subject = "%s Updated The Task '%s'" % (g.user.username, task.title)
 
-        mailer.send_mail(user.email, subject, email_body)
+            mailer.send_mail(user.email, subject, email_body)
 
     return redirect(url_for("view_task", id=id, page="last"))
 
@@ -292,13 +293,9 @@ def create_task(id):
     # AH HA!!!! Need to do this manual coercion to int, otherwise
     # the form is NEVER validated! Gods, this was driving me INSANE!!!
     try:
-        print "At beginning of try branch, and we have form.privacy.data=%s" % form.privacy.data
         form.privacy.data = int(form.privacy.data)
-        print "End of try branch, form.privacy.data=%s" % form.privacy.data
     except:
         form.privacy.data = g.user.options.default_task_privacy
-        print "In except branch, form.privacy.data=%d" % form.privacy.data
-        print "Also, g.user.options.default_task_privacy=%d" % g.user.options.default_task_privacy
 
     if form.validate_on_submit():
 
@@ -322,17 +319,15 @@ def create_task(id):
 
         flash("Task created!", "success")
 
-        email_body = render_template("mail/new_task.html", task=task)
-        subject = "%s Has Created A New Task For You!" % g.user.username
+        if user.options.task_created_email_alert:
+            email_body = render_template("mail/new_task.html", task=task)
+            subject = "%s Has Created A New Task For You!" % g.user.username
 
-        mailer.send_mail(task.doer.email, subject, email_body)
+            mailer.send_mail(task.doer.email, subject, email_body)
 
         return redirect(url_for("view_task", id=task.id))
 
-    print "WTF"
-    print "default task privacy = %s" % g.user.options.default_task_privacy
     form.privacy.data = g.user.options.default_task_privacy
-    print "form.privacy.data should be 2, instead it's %d" % form.privacy.data
 
     return render_template("task/new.html", form=form)
 
@@ -362,10 +357,11 @@ def task_start(id):
 
         flash("Task '%s' has been started!" % task.title, "success")
 
-        subject = "%s Has Started Task '%s'" % (task.doer.username, task.title)
-        email_body = render_template("mail/task_started.html", task=task)
+        if task.requester.options.task_start_email_alert:
+            subject = "%s Has Started Task '%s'" % (task.doer.username, task.title)
+            email_body = render_template("mail/task_started.html", task=task)
 
-        mailer.send_mail(task.requester.email, subject, email_body)
+            mailer.send_mail(task.requester.email, subject, email_body)
 
     return redirect(url_for("view_task", id=id))
 
@@ -398,9 +394,10 @@ def task_complete(id):
 
         flash("Task '%s' completed!", "success")
 
-        subject = "Awaiting Your Approval: %s Has Completed Task '%s'" % (task.doer.username, task.title)
-        email_body = render_template("mail/task_doer_completed.html", task=task)
-        mailer.send_mail(task.requester.email, subject, email_body)
+        if task.requester.options.task_complete_email_alert:
+            subject = "Awaiting Your Approval: %s Has Completed Task '%s'" % (task.doer.username, task.title)
+            email_body = render_template("mail/task_doer_completed.html", task=task)
+            mailer.send_mail(task.requester.email, subject, email_body)
 
     return redirect(url_for("view_task", id=id))
 
@@ -435,9 +432,10 @@ def task_accept(id):
 
         flash("Task '%s' accepted!" % task.title, "success")
 
-        subject = "%s Has Accepted Task '%s'!" % (task.requester.username, task.title)
-        email_body = render_template("mail/task_accepted.html", task=task)
-        mailer.send_mail(task.doer.email, subject, email_body)
+        if task.doer.options.task_accept_reject_email_alert:
+            subject = "%s Has Accepted Task '%s'!" % (task.requester.username, task.title)
+            email_body = render_template("mail/task_accepted.html", task=task)
+            mailer.send_mail(task.doer.email, subject, email_body)
 
     return redirect(url_for("view_task", id=id))
 
@@ -466,9 +464,10 @@ def task_reject(id):
 
         flash("Task rejected! How about a punishment task for %s?" % task.doer.username, "success")
 
-        subject = "%s Has Rejected Task '%s'!" % (task.requester.username, task.title)
-        email_body = render_template("mail/task_rejected.html", task=task)
-        mailer.send_mail(task.doer.email, subject, email_body)
+        if task.doer.options.task_accept_reject_email_alert:
+            subject = "%s Has Rejected Task '%s'!" % (task.requester.username, task.title)
+            email_body = render_template("mail/task_rejected.html", task=task)
+            mailer.send_mail(task.doer.email, subject, email_body)
 
     return redirect(url_for("view_task", id=id))
 
@@ -502,9 +501,10 @@ def update_task(id):
 
         flash("Task updated!", "success")
 
-        email_body = render_template("mail/task_edit.html", task=task)
-        subject = "%s Has Edited The Task '%s'" % (g.user.username, task.title)
-        mailer.send_mail(task.doer.email, subject, email_body)
+        if task.doer.options.task_edit_email_alert:
+            email_body = render_template("mail/task_edit.html", task=task)
+            subject = "%s Has Edited The Task '%s'" % (g.user.username, task.title)
+            mailer.send_mail(task.doer.email, subject, email_body)
 
         return redirect(url_for("view_task", id=id))
 
@@ -531,6 +531,11 @@ def send_friend_request(id):
     fr = FriendRequest(user_id=g.user.id, friend_id=id)
     db.session.add(fr)
     db.session.commit()
+
+    if user.options.friend_request_email_alert:
+        subject = "Friend Request From %s" % g.user.username
+        email_body = render_template("mail/friend_request.html", user=user)
+        mailer.send_mail(user.email, subject, email_body)
 
     flash("Friend request sent!", "success")
     return redirect(url_for('profile_page', id=id))
@@ -571,6 +576,11 @@ def accept_friend_request(id):
     db.session.add(f2)
 
     db.session.commit()
+
+    if user.options.friend_request_accept_email_alert:
+        subject = "%s Accepted Your Friend Request!" % g.user.username
+        email_body = render_template("mail/friend_request_accepted.html", user=user)
+        mailer.send_mail(user.email, subject, email_body)
 
     flash("Friend request accepted!", "success")
     return redirect(url_for("friends"))
@@ -859,7 +869,9 @@ def sign_up():
         # If we haven't seen the username or password before, then we're golden!
 
         u = User(**form_data)
+        options = UserOptions(user_id=u.id)
         db.session.add(u)
+        db.session.add(options)
         db.session.commit()
 
         # Re-query to get the full user object (id, etc).
@@ -960,6 +972,12 @@ def view_message(id):
 @app.route("/message/send/<int:id>", methods=['GET', 'POST'])
 @login_required
 def new_message(id):
+    user = User.query.filter_by(id=id).first()
+
+    if user is None:
+        flash("You cannot send a message to that user.", "error")
+        return redirect(url_for("index"))
+
     form = NewMessageForm()
     if form.validate_on_submit():
         message = Message(
@@ -972,11 +990,9 @@ def new_message(id):
         db.session.add(message)
         db.session.commit()
 
-        user = User.query.filter_by(id=id).first()
-
-        email_body = render_template("mail/new_message.html", user=user, message=message)
-
-        mailer.send_mail(user.email, "New message from %s at Kinkstruction" % g.user.username, email_body)
+        if user.options.message_new_email_alert:
+            email_body = render_template("mail/new_message.html", user=user, message=message)
+            mailer.send_mail(user.email, "New message from %s at Kinkstruction" % g.user.username, email_body)
 
         flash("Message sent!", "success")
         return redirect(url_for('messages'))
@@ -1012,9 +1028,10 @@ def message_reply(id):
 
         user = original.from_user()
 
-        email_body = render_template("mail/new_message.html", user=user, message=message)
+        if user.options.message_new_email_alert:
+            email_body = render_template("mail/new_message.html", user=user, message=message)
 
-        mailer.send_mail(user.email, "New message from %s at Kinkstruction" % g.user.username, email_body)
+            mailer.send_mail(user.email, "New message from %s at Kinkstruction" % g.user.username, email_body)
 
         flash("Message sent!", "success")
         return redirect(url_for('messages'))
