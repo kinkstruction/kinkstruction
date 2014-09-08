@@ -15,6 +15,12 @@ class OptionsForm(Form):
 
     )
 
+    email = StringField('Email: ',
+        validators=[
+            Optional(),
+            Email(message="Invalid email address")
+        ])
+
     password = PasswordField('Password: ',
         validators=[
             Optional(),
@@ -35,6 +41,20 @@ class OptionsForm(Form):
         (1, "Friends (can be seen by friends of either you or the assignee)"),
         (2, "Private (can be seen only by you and the assignee)")
     ], default=0, validators=[Optional()], coerce=int)
+
+    friend_request_email_alert = BooleanField("When someone sends me a friend request: ")
+    friend_request_accept_email_alert = BooleanField("When a friend request that I've sent is accepted: ")
+
+    message_new_email_alert = BooleanField("When I receive a new message (includes replies): ")
+
+    task_created_email_alert = BooleanField("When a new task is created for me: ")
+    task_edit_email_alert = BooleanField("When one of my tasks has been edited: ")
+    task_accept_reject_email_alert = BooleanField("When one of my tasks has been accepted or rejected: ")
+
+    task_start_email_alert = BooleanField("When a task I've assigned has been started: ")
+    task_complete_email_alert = BooleanField("When a task I've assigned has been completed: ")
+
+    task_new_post_email_alert = BooleanField("When a new post has been made on either one of my tasks or a task I've created: ")
 
 
 class UpdateTaskForm(Form):

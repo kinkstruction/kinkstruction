@@ -99,6 +99,10 @@ def options():
 
     form = OptionsForm()
 
+    print "\n\n"
+    print form.data
+    print "\n\n"
+
     try:
         form.profile_privacy.data = int(form.profile_privacy.data)
     except:
@@ -112,49 +116,53 @@ def options():
     if form.validate_on_submit():
 
         username = form.username.data
+        email = form.email.data
         password = form.password.data
         profile_privacy = int(form.profile_privacy.data)
         default_task_privacy = int(form.default_task_privacy.data)
 
-        user_changes_made = False
-        options_changes_made = False
-
         if username and username != g.user.username:
             if not User.query.filter_by(username=username).count():
                 g.user.username = username
-                user_changes_made = True
-                flash("Username updated!", "success")
             else:
                 flash("Sorry, that username is taken.", "error")
 
+        if email and email != g.user.email:
+            if not User.query.filter_by(email=email).count():
+                g.user.email = email
+            else:
+                flash("Sorry, that email is taken", "error")
+
         if password and not bcrypt.check_password_hash(g.user.pw_hash, password):
             g.user.pw_hash = bcrypt.generate_password_hash(password)
-            user_changes_made = True
-            flash("Password Changed!", "success")
 
         if profile_privacy != g.user.options.profile_privacy:
             g.user.options.profile_privacy = profile_privacy
-            options_changes_made = True
-            flash("Profile Privacy Changed!", "success")
 
         if default_task_privacy != g.user.options.default_task_privacy:
             g.user.options.default_task_privacy = default_task_privacy
-            options_changes_made = True
-            flash("Default Task Privacy Changed!", "success")
 
-        if user_changes_made:
-            db.session.add(g.user)
-            db.session.commit()
+        print form.friend_request_email_alert
+        print form.friend_request_email_alert.data
 
-        if options_changes_made:
-            db.session.add(g.user.options)
-            db.session.commit()
+        for alert_attr in [x for x in dir(g.user.options) if "_email_alert" in x]:
 
-        if not user_changes_made and not options_changes_made:
-            flash("No changes were made...", "warning")
+            setattr(g.user.options, alert_attr, getattr(form, alert_attr).data)
+
+        db.session.add(g.user.options)
+        db.session.commit()
+
+        db.session.add(g.user)
+        db.session.commit()
+
+        flash("Changes updated!", "success")
 
     else:
         form.username.data = g.user.username
+        form.email.data = g.user.email
+
+        for email_attr in [x for x in dir(g.user.options) if "_email_alert" in x]:
+            getattr(form, email_attr).data = getattr(g.user.options, email_attr)
 
         form.profile_privacy.data = g.user.options.profile_privacy
         form.default_task_privacy.data = g.user.options.default_task_privacy

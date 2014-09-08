@@ -1,12 +1,15 @@
-{% macro form_group_field(field) %}
+{% macro form_group_field(field, label_size=2) %}
 <div class="form-group">
-    {{field.label(class_="col-md-2 control-label")}}
+    {% set small_class = "col-md-" ~ label_size ~ " control-label"%}
+    {{field.label(class_=small_class)}}
     {#
         An absolutely idiotic design decision: all arguments must be displayed in order to be used.
         Source: http://stackoverflow.com/a/13944920
     #}
     <span class="delete-me" style="display:none">{{kwargs}}</span>
-    <div class="col-md-8">
+
+    {% set large_class = "col-md-" ~ (10 - label_size) %}
+    <div class={{large_class}}>
         {{field(**kwargs)}}
         {% for error in field.errors %}
             <span class="text-danger">[{{error}}]</span><br>
@@ -14,6 +17,12 @@
     </div>
 </div>
 {% endmacro %}
+
+{# {% macro options_checkbox(field, ) %}
+<div class="form-group">
+    {{field.labe}}
+</div>
+{% endmacro %} #}
 
 {% macro message_item(message, inbox=True) %}
     <a class="list-group-item" href="{{url_for('view_message', id=message.id)}}">

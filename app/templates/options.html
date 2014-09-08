@@ -8,6 +8,7 @@
             <legend>Change Your Username Or Password:</legend>
 
             {{form_group_field(form.username, size=20, maxlength=256)}}
+            {{form_group_field(form.email, size=20, maxlength=256)}}
             {{form_group_field(form.password, size=20, maxlength=256)}}
             {{form_group_field(form.confirm_password, size=20, maxlength=256)}}
 
@@ -16,6 +17,17 @@
 
             <legend>Default Task Privacy:</legend>
             <p>{{form.default_task_privacy}}</p>
+
+            <legend>Email Alerts:</legend>
+            {{form_group_field(form.friend_request_email_alert, label_size=8)}}
+            {{form_group_field(form.friend_request_accept_email_alert, label_size=8)}}
+            {{form_group_field(form.message_new_email_alert, label_size=8)}}
+            {{form_group_field(form.task_created_email_alert, label_size=8)}}
+            {{form_group_field(form.task_edit_email_alert, label_size=8)}}
+            {{form_group_field(form.task_start_email_alert, label_size=8)}}
+            {{form_group_field(form.task_complete_email_alert, label_size=8)}}
+            {{form_group_field(form.task_accept_reject_email_alert, label_size=8)}}
+            {{form_group_field(form.task_new_post_email_alert, label_size=8)}}
         </fieldset>
         <div class="col-md-2">
             <input type="submit" name="log_in" value="Save Changes">
