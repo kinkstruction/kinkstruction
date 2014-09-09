@@ -10,22 +10,7 @@
             {{form_group_field(form.points, size=5)}}
             (Points will be awarded upon acceptance of the task)
             {{form_group_field(form.description, cols=48, rows=12)}}
-            {{form.privacy}}
-            <div class="form-group">
-                <div class="col-md-8">
-
-                    <!-- {% for subfield in form.privacy %} -->
-                    <!-- <p>
-                        {{subfield}} {{subfield.label}}
-                    </p> -->
-                    <!-- <div class="radio"
-                        <label>
-                            {{subfield}} {{subfield.label}}
-                        </label>
-                    </div> -->
-                    <!-- {% endfor %} -->
-                </div>
-            </div>
+            {{form_group_field(form.privacy)}}
         </fieldset>
         <div class="col-md-2">
             <button type="submit" class="btn btn-primary">Create Task</button>

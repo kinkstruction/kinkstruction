@@ -18,12 +18,6 @@
 </div>
 {% endmacro %}
 
-{# {% macro options_checkbox(field, ) %}
-<div class="form-group">
-    {{field.labe}}
-</div>
-{% endmacro %} #}
-
 {% macro message_item(message, inbox=True) %}
     <a class="list-group-item" href="{{url_for('view_message', id=message.id)}}">
         <div class="left">

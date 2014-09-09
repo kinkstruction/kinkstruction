@@ -2,6 +2,7 @@ from flask.ext.wtf import Form
 from wtforms import StringField, PasswordField, BooleanField, IntegerField, TextAreaField, SelectField
 from wtforms.validators import *
 from app.models import User, Task
+from flask.ext.pagedown.fields import PageDownField
 
 # TODO: Refactor the living bejeezus out of this...
 
@@ -65,7 +66,7 @@ class UpdateTaskForm(Form):
             Length(max=256, message="Titles must have a length of at most 256 characters")
         ]
     )
-    description = TextAreaField('Description: ', validators=[Required()])
+    description = PageDownField('Description: <br>(Preview below)', validators=[Required()])
     privacy = SelectField('Privacy: ', choices=[
         (0, "Public (can be seen by any member)"),
         (1, "Friends (can be seen by friends of either you or the assignee)"),
@@ -80,7 +81,7 @@ class CreateTaskForm(Form):
             Length(max=256, message="Titles must have a length of at most 256 characters")
         ]
     )
-    description = TextAreaField('Description: ', validators=[Required()])
+    description = PageDownField('Description: <br>(Preview below)', validators=[Required()])
     privacy = SelectField("Privacy: ", choices=[
         (0, "Public (can be seen by any member)"),
         (1, "Friends (can be seen by friends of either you or the assignee)"),
@@ -180,7 +181,7 @@ class EditProfileForm(Form):
     gender = StringField('Gender: ', validators=[Optional(), Length(max=24)])
     role = StringField('Role: ', validators=[Optional(), Length(max=24)])
     orientation = StringField('Orientation: ', validators=[Optional(), Length(max=24)])
-    bio = TextAreaField('About Yourself: ', validators=[Optional()])
+    bio = PageDownField('About Yourself: <br>(Preview below)', validators=[Optional()])
 
 
 class SignUpForm(Form):

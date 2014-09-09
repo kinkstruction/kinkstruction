@@ -7,6 +7,7 @@ from flask.ext.script import Manager
 from flask.ext.migrate import Migrate, MigrateCommand
 from mailer import Mailer
 from flaskext.markdown import Markdown
+from flask.ext.pagedown import PageDown
 
 
 app = Flask(__name__)
@@ -15,6 +16,7 @@ db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
 mail = Mail(app)
 mailer = Mailer(app, mail)
+pagedown = PageDown(app)
 
 lm = LoginManager()
 lm.init_app(app)

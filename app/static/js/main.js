@@ -14,5 +14,4 @@ $(document).ready(function(){
         var $this = $(this);
         $this.html(moment.utc($this.html()).fromNow());
     });
-
 });
